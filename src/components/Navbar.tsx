@@ -9,7 +9,7 @@ export default function Navbar() {
     <nav className="fixed top-0 left-0 w-full h-20 bg-white dark:bg-duoc-blue shadow-md z-50">
       <div className="max-w-7xl mx-auto flex items-center justify-between px-4 h-full">
         {/* Logo */}
-        <Link href="/" className="flex items-center gap-2">
+        <Link href="/home" className="flex items-center gap-2">
           <Image
             src="/images/dllogolight.png"
             alt="Duoc Link"
@@ -20,10 +20,10 @@ export default function Navbar() {
 
         {/* Menú de escritorio */}
         <div className="hidden md:flex items-center gap-5">
-          <Link href="#carpool" className="hover:text-duoc-yellow">Transporte</Link>
-          <Link href="#notes" className="hover:text-duoc-yellow">Apuntes</Link>
-          <Link href="#tutoring" className="hover:text-duoc-yellow">Ayudantías</Link>
-          <button className="bg-duoc-white text-black px-4 py-2 rounded-lg font-semibold hover:bg-duoc-gray transition ml-2">
+          <Link href="#carpool" className="!text-duoc-white hover:!text-duoc-yellow">Transporte</Link>
+          <Link href="#notes" className="!text-duoc-white hover:!text-duoc-yellow">Apuntes</Link>
+          <Link href="#tutoring" className="!text-duoc-white hover:!text-duoc-yellow">Ayudantías</Link>
+          <button className="bg-duoc-white text-black px-4 py-2 rounded-lg font-semibold hover:bg-duoc-yellow transition ml-2 cursor-pointer">
             Ingresar
           </button>
         </div>

@@ -23,7 +23,7 @@ export default function Login() {
         form.password === userData.password
       ) {
         setError("");
-        router.push("/");
+        router.push("/home"); // <-- Cambia aquí
       } else {
         setError("Correo o contraseña incorrectos.");
       }

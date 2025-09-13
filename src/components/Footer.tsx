@@ -34,7 +34,7 @@ export default function Footer() {
         </div>
       </div>
       <p className="text-center mt-8 text-sm text-duoc-gray">
-        © {new Date().getFullYear()} Duoc Link. Todos los derechos reservados.
+        © {new Date().getFullYear()} Duoc Link. No tenemos ningún derecho reservado. Por favor no demandar.
       </p>
     </footer>
   );
