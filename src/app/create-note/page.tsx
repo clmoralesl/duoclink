@@ -1,15 +1,38 @@
 "use client";
 
 import { useState } from "react";
+import { useRouter } from "next/navigation";
+
+type NoteType = "text" | "media" | "link" | "document";
 
 export default function CreateNote() {
-  const [activeTab, setActiveTab] = useState<"text" | "media" | "link" | "document">("text");
+  const router = useRouter();
+  const [activeTab, setActiveTab] = useState<NoteType>("text");
   const [tags, setTags] = useState<string[]>([]);
   const [tagInput, setTagInput] = useState("");
+  const [title, setTitle] = useState("");
+  const [body, setBody] = useState("");
+  const [description, setDescription] = useState("");
+  const [linkUrl, setLinkUrl] = useState("");
+
+  // Estado de errores por campo
+  const [errors, setErrors] = useState({
+    title: "",
+    body: "",
+    description: "",
+    linkUrl: "",
+  });
 
   const addTag = () => {
-    if (tagInput.trim() && !tags.includes(tagInput.trim())) {
-      setTags([...tags, tagInput.trim()]);
+    if (!tagInput.trim()) return;
+
+    const newTags = tagInput
+      .split(",")
+      .map((t) => t.trim())
+      .filter((t) => t && !tags.includes(t));
+
+    if (newTags.length > 0) {
+      setTags([...tags, ...newTags]);
       setTagInput("");
     }
   };
@@ -18,75 +41,145 @@ export default function CreateNote() {
     setTags(tags.filter((t) => t !== tag));
   };
 
+  const handlePublish = () => {
+    // Inicializar errores
+    const newErrors = { title: "", body: "", description: "", linkUrl: "" };
+    let hasError = false;
+
+    if (!title.trim()) {
+      newErrors.title = "El título es obligatorio";
+      hasError = true;
+    }
+
+    if (activeTab === "text" && !body.trim()) {
+      newErrors.body = "El contenido del apunte es obligatorio";
+      hasError = true;
+    }
+
+    if (activeTab === "link" && !linkUrl.trim()) {
+      newErrors.linkUrl = "La URL es obligatoria";
+      hasError = true;
+    }
+
+    // Opcional: description no obligatorio
+    setErrors(newErrors);
+
+    if (hasError) return;
+
+    const newNote = {
+      id: Date.now(),
+      type: activeTab,
+      title: title.trim(),
+      body: activeTab === "text" ? body.trim() : undefined,
+      description: activeTab !== "text" ? description.trim() : undefined,
+      link: activeTab === "link" ? linkUrl.trim() : undefined,
+      tags,
+    };
+
+    const storedNotes = JSON.parse(localStorage.getItem("notes") || "[]");
+    storedNotes.push(newNote);
+    localStorage.setItem("notes", JSON.stringify(storedNotes));
+
+    // Limpiar campos
+    setTitle("");
+    setBody("");
+    setDescription("");
+    setTags([]);
+    setTagInput("");
+    setLinkUrl("");
+    setErrors({ title: "", body: "", description: "", linkUrl: "" });
+
+    router.push("/apuntes");
+  };
+
   return (
     <main className="min-h-screen bg-duoc-gray pt-25 pb-10 px-4 text-duoc-blue">
       <div className="max-w-4xl mx-auto bg-white p-6 rounded-xl shadow-md flex flex-col gap-6">
 
         {/* Tabs */}
         <div className="flex gap-4 mb-4">
-          <button
-            onClick={() => setActiveTab("text")}
-            className={`px-4 py-2 rounded-lg font-semibold transition cursor-pointer ${
-              activeTab === "text" ? "bg-duoc-blue text-white" : "!text-duoc-blue hover:bg-duoc-gray"
-            }`}
-          >
-            Texto
-          </button>
-          <button
-            onClick={() => setActiveTab("media")}
-            className={`px-4 py-2 rounded-lg font-semibold transition cursor-pointer ${
-              activeTab === "media" ? "bg-duoc-blue text-white" : "!text-duoc-blue hover:bg-duoc-gray"
-            }`}
-          >
-            Imagen / Video
-          </button>
-          <button
-            onClick={() => setActiveTab("link")}
-            className={`px-4 py-2 rounded-lg font-semibold transition cursor-pointer ${
-              activeTab === "link" ? "bg-duoc-blue text-white" : "!text-duoc-blue hover:bg-duoc-gray"
-            }`}
-          >
-            Link
-          </button>
-          <button
-            onClick={() => setActiveTab("document")}
-            className={`px-4 py-2 rounded-lg font-semibold transition cursor-pointer ${
-              activeTab === "document" ? "bg-duoc-blue text-white" : "!text-duoc-blue hover:bg-duoc-gray"
-            }`}
-          >
-            Documento
-          </button>
+          {["text", "media", "link", "document"].map((tab) => (
+            <button
+              key={tab}
+              onClick={() => setActiveTab(tab as NoteType)}
+              className={`px-4 py-2 rounded-lg font-semibold transition cursor-pointer ${
+                activeTab === tab ? "bg-duoc-blue text-white" : "!text-duoc-blue hover:bg-duoc-gray"
+              }`}
+            >
+              {tab === "text"
+                ? "Texto"
+                : tab === "media"
+                ? "Imagen / Video"
+                : tab === "link"
+                ? "Enlace"
+                : "Documento"}
+            </button>
+          ))}
         </div>
 
-        {/* Tab Content */}
+        {/* Título */}
+        <div className="flex flex-col gap-1">
+          <input
+            type="text"
+            placeholder="Título del apunte *"
+            value={title}
+            onChange={(e) => setTitle(e.target.value)}
+            className={`w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 ${
+              errors.title ? "border-red-500 focus:ring-red-500" : "border-gray-300 focus:ring-duoc-yellow"
+            } text-duoc-blue`}
+          />
+          {errors.title && <p className="text-red-500 text-sm">{errors.title}</p>}
+        </div>
+
+        {/* Contenido por tipo */}
         {activeTab === "text" && (
-          <div className="flex flex-col gap-4">
-            <input
-              type="text"
-              placeholder="Título del apunte"
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-duoc-yellow text-duoc-blue"
-            />
+          <div className="flex flex-col gap-1">
             <textarea
-              placeholder="Escribe tu apunte aquí..."
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-duoc-yellow h-48 text-duoc-blue"
+              placeholder="Escribe tu apunte aquí *"
+              value={body}
+              onChange={(e) => setBody(e.target.value)}
+              className={`w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 h-48 text-duoc-blue ${
+                errors.body ? "border-red-500 focus:ring-red-500" : "border-gray-300 focus:ring-duoc-yellow"
+              }`}
             />
+            {errors.body && <p className="text-red-500 text-sm">{errors.body}</p>}
           </div>
         )}
 
+        {activeTab === "link" && (
+          <>
+            <textarea
+              placeholder="Descripción (opcional)"
+              value={description}
+              onChange={(e) => setDescription(e.target.value)}
+              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 h-24 text-duoc-blue"
+            />
+            <div className="flex flex-col gap-1">
+              <input
+                type="url"
+                placeholder="https:// *"
+                value={linkUrl}
+                onChange={(e) => setLinkUrl(e.target.value)}
+                className={`w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 text-duoc-blue ${
+                  errors.linkUrl ? "border-red-500 focus:ring-red-500" : "border-gray-300 focus:ring-duoc-yellow"
+                }`}
+              />
+              {errors.linkUrl && <p className="text-red-500 text-sm">{errors.linkUrl}</p>}
+            </div>
+          </>
+        )}
+
+        {/* Media */}
         {activeTab === "media" && (
-          <div className="flex flex-col gap-4">
-            <input
-              type="text"
-              placeholder="Título del apunte"
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-duoc-yellow text-duoc-blue"
+          <>
+            <textarea
+              placeholder="Descripción (opcional)"
+              value={description}
+              onChange={(e) => setDescription(e.target.value)}
+              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 h-24 text-duoc-blue"
             />
             <label className="block font-semibold mb-2 text-duoc-blue">Subir imagen o video</label>
-            <input
-              id="media-upload"
-              type="file"
-              accept="image/*,video/*"
-              className="hidden"
-            />
+            <input id="media-upload" type="file" accept="image/*,video/*" className="hidden" />
             <label
               htmlFor="media-upload"
               className="inline-block px-4 py-2 bg-duoc-yellow text-duoc-blue font-semibold rounded-lg shadow-md hover:bg-duoc-blue hover:text-white transition cursor-pointer"
@@ -94,30 +187,17 @@ export default function CreateNote() {
               Seleccionar archivo
             </label>
             <p className="mt-2 text-sm text-gray-600 text-duoc-blue">Formatos permitidos: JPG, PNG, MP4</p>
-          </div>
+          </>
         )}
 
-        {activeTab === "link" && (
-          <div className="flex flex-col gap-4">
-            <input
-              type="text"
-              placeholder="Título del apunte"
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-duoc-yellow text-duoc-blue"
-            />
-            <input
-              type="url"
-              placeholder="https://"
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-duoc-yellow text-duoc-blue"
-            />
-          </div>
-        )}
-
+        {/* Documento */}
         {activeTab === "document" && (
-          <div className="flex flex-col gap-4">
-            <input
-              type="text"
-              placeholder="Título del documento"
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-duoc-yellow text-duoc-blue"
+          <>
+            <textarea
+              placeholder="Descripción (opcional)"
+              value={description}
+              onChange={(e) => setDescription(e.target.value)}
+              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 h-24 text-duoc-blue"
             />
             <label className="block font-semibold mb-2 text-duoc-blue">Subir documento</label>
             <input
@@ -135,7 +215,7 @@ export default function CreateNote() {
             <p className="mt-2 text-sm text-gray-600 text-duoc-blue">
               Formatos permitidos: PDF, Word, PowerPoint, Excel
             </p>
-          </div>
+          </>
         )}
 
         {/* Tags */}
@@ -155,10 +235,10 @@ export default function CreateNote() {
           <div className="flex gap-2 mt-2">
             <input
               type="text"
-              placeholder="Agregar tag"
+              placeholder="Agregar tag(s), separados por coma"
               value={tagInput}
               onChange={(e) => setTagInput(e.target.value)}
-              className="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-duoc-yellow text-duoc-blue"
+              className="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 text-duoc-blue"
             />
             <button
               type="button"
@@ -171,7 +251,10 @@ export default function CreateNote() {
         </div>
 
         {/* Publicar */}
-        <button className="mt-4 px-6 py-3 bg-duoc-blue text-white font-semibold rounded-lg shadow-md hover:bg-duoc-yellow hover:text-duoc-blue transition cursor-pointer">
+        <button
+          onClick={handlePublish}
+          className="mt-4 px-6 py-3 bg-duoc-blue text-white font-semibold rounded-lg shadow-md hover:bg-duoc-yellow hover:text-duoc-blue transition cursor-pointer"
+        >
           Publicar
         </button>
       </div>

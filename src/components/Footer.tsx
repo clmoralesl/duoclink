@@ -9,7 +9,7 @@ export default function Footer() {
         <div>
           <h2 className="text-2xl font-bold">Duoc Link</h2>
           <p className="mt-2 text-duoc-gray">
-            Conecta estudiantes, comparte conocimiento y ayuda a tu comunidad.
+            Conecta, aprende y comparte con tu comunidad estudiantil.
           </p>
         </div>
 

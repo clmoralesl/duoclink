@@ -1,181 +1,178 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Link from "next/link";
+
+type Note = {
+  id: number;
+  type: "text" | "media" | "link" | "document";
+  title: string;
+  body?: string;
+  description?: string;
+  link?: string; // Para tipo link
+  tags: string[];
+};
+
+type Carpool = {
+  id: number;
+  from: string;
+  to: string;
+  time: string;
+  seats: number;
+};
+
+type Tutoring = {
+  id: number;
+  subject: string;
+  date: string;
+  tutor: string;
+};
 
 export default function Home() {
   const [activeTab, setActiveTab] = useState<"notes" | "carpool" | "tutoring">("notes");
+  const [notes, setNotes] = useState<Note[]>([]);
+  
+  // Ejemplos simulados
+  const carpoolExamples: Carpool[] = [
+    { id: 1, from: "Valparaíso", to: "Viña del Mar", time: "08:30 AM", seats: 3 },
+    { id: 2, from: "Concepción", to: "Talcahuano", time: "02:00 PM", seats: 2 },
+  ];
+
+  const tutoringExamples: Tutoring[] = [
+    { id: 1, subject: "Matemáticas", date: "2025-09-15 10:00", tutor: "Juan Pérez" },
+    { id: 2, subject: "Programación", date: "2025-09-16 15:00", tutor: "María Gómez" },
+  ];
+
+  // Cargar apuntes desde localStorage
+  useEffect(() => {
+    const storedNotes = JSON.parse(localStorage.getItem("notes") || "[]");
+    setNotes(storedNotes);
+  }, []);
 
   return (
     <main className="min-h-screen bg-duoc-gray pt-25 pb-10 px-4">
       <div className="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-4 gap-6">
 
-        {/* Columna izquierda (Perfil / Notif / Config) */}
+        {/* Columna izquierda */}
         <aside className="flex flex-col gap-4 bg-white p-4 rounded-xl shadow-md order-2 md:order-1">
           <h2 className="text-lg font-bold !text-duoc-blue">Menú</h2>
           <Link href="#" className="!text-duoc-blue visited:!text-duoc-blue hover:!text-duoc-yellow">Perfil</Link>
           <Link href="#" className="!text-duoc-blue visited:!text-duoc-blue hover:!text-duoc-yellow">Notificaciones</Link>
           <Link href="#" className="!text-duoc-blue visited:!text-duoc-blue hover:!text-duoc-yellow">Configuración</Link>
+          <Link href="/login" className="!text-duoc-blue visited:!text-duoc-blue hover:!text-duoc-yellow">Cerrar Sesión</Link>
         </aside>
 
-        {/* Columna central (Feed con tabs) */}
+        {/* Columna central */}
         <section className="md:col-span-2 flex flex-col gap-6 order-1 md:order-2">
           {/* Tabs */}
           <div className="flex gap-4 bg-white rounded-xl shadow-md p-2">
-            <button
-              onClick={() => setActiveTab("notes")}
-              className={`px-4 py-2 rounded-lg font-semibold transition cursor-pointer ${
-                activeTab === "notes" ? "bg-duoc-blue text-white" : "!text-duoc-blue hover:bg-duoc-gray"
-              }`}
-            >
-              Apuntes
-            </button>
-            <button
-              onClick={() => setActiveTab("carpool")}
-              className={`px-4 py-2 rounded-lg font-semibold transition cursor-pointer ${
-                activeTab === "carpool" ? "bg-duoc-blue text-white" : "!text-duoc-blue hover:bg-duoc-gray"
-              }`}
-            >
-              Viajes
-            </button>
-            <button
-              onClick={() => setActiveTab("tutoring")}
-              className={`px-4 py-2 rounded-lg font-semibold transition cursor-pointer ${
-                activeTab === "tutoring" ? "bg-duoc-blue text-white" : "!text-duoc-blue hover:bg-duoc-gray"
-              }`}
-            >
-              Ayudantías
-            </button>
+            {["notes", "carpool", "tutoring"].map((tab) => (
+              <button
+                key={tab}
+                onClick={() => setActiveTab(tab as typeof activeTab)}
+                className={`px-4 py-2 rounded-lg font-semibold transition cursor-pointer ${
+                  activeTab === tab ? "bg-duoc-blue text-white" : "!text-duoc-blue hover:bg-duoc-gray"
+                }`}
+              >
+                {tab === "notes" ? "Apuntes" : tab === "carpool" ? "Viajes" : "Ayudantías"}
+              </button>
+            ))}
           </div>
 
-          {/* Botón para publicar nuevo según tab */}
-            {activeTab === "notes" && (
-              <div className="flex justify-start">
-                <Link
-                  href="/create-note"
-                  className="mb-4 px-4 py-2 bg-duoc-yellow text-duoc-blue font-semibold rounded-lg shadow-md hover:bg-duoc-blue hover:text-white transition cursor-pointer"
-                >
-                  Publicar nuevo apunte
-                </Link>
-              </div>
-            )}
-          {activeTab === "carpool" && (
+          {/* Botón nuevo apunte */}
+          {activeTab === "notes" && (
             <div className="flex justify-start">
-              <button className="mb-4 px-4 py-2 bg-duoc-yellow text-duoc-blue font-semibold rounded-lg shadow-md hover:bg-duoc-blue hover:text-white transition cursor-pointer">
-                Publicar nuevo viaje
-              </button>
-            </div>
-          )}
-          {activeTab === "tutoring" && (
-            <div className="flex justify-start gap-x-4">
-              <button className="mb-4 px-4 py-2 bg-duoc-yellow text-duoc-blue font-semibold rounded-lg shadow-md hover:bg-duoc-blue hover:text-white transition cursor-pointer">
-                Publicar nueva ayudantía
-              </button>
-              <button className="mb-4 px-4 py-2 bg-duoc-yellow text-duoc-blue font-semibold rounded-lg shadow-md hover:bg-duoc-blue hover:text-white transition cursor-pointer">
-                Publicar nueva solicitud de ayudantía
-              </button>
+              <Link
+                href="/create-note"
+                className="mb-4 px-4 py-2 bg-duoc-yellow text-duoc-blue font-semibold rounded-lg shadow-md hover:bg-duoc-blue hover:text-white transition cursor-pointer"
+              >
+                Publicar nuevo apunte
+              </Link>
             </div>
           )}
 
           {/* Contenido según tab activo */}
           {activeTab === "notes" && (
             <>
-              <div className="bg-white p-6 rounded-xl shadow-md">
-                <h3 className="text-xl font-bold text-duoc-blue mb-2">Apunte 🗒️: Resumen códigos de Machine Learning</h3>
-                <p className="text-gray-700">Maura publicó apunte en Machine Learning, pero se le cayó el internet.</p>
-                <button className="mt-3 px-4 py-2 bg-duoc-blue text-white rounded-lg hover:bg-duoc-yellow hover:text-duoc-blue transition cursor-pointer">
-                  Ver apunte
-                </button>
-              </div>
-              <div className="bg-white p-6 rounded-xl shadow-md">
-                <h3 className="text-xl font-bold text-duoc-blue mb-2">Apunte 🗒️: Inglés - Present Perfect/Past Perfect</h3>
-                <p className="text-gray-700">Carla publicó apunte en Ingles Intermedio.</p>
-                <button className="mt-3 px-4 py-2 bg-duoc-blue text-white rounded-lg hover:bg-duoc-yellow hover:text-duoc-blue transition cursor-pointer">
-                  Ver apunte
-                </button>
-              </div>
-              <div className="bg-white p-6 rounded-xl shadow-md">
-                <h3 className="text-xl font-bold text-duoc-blue mb-2">Video 🎥: Introducción a aplicaciones móviles con Kotlin 📲</h3>
-                <p className="text-gray-700">Luis publicó un video en Desarrollo de aplicaciones móviles.</p>
-                <button className="mt-3 px-4 py-2 bg-duoc-blue text-white rounded-lg hover:bg-duoc-yellow hover:text-duoc-blue transition cursor-pointer">
-                  Ver apunte
-                </button>
-              </div>
-              {/* Botón ver todos */}
-              <div className="flex justify-center">
-                <button className="mt-4 px-6 py-2 bg-duoc-blue text-white font-semibold rounded-lg shadow-md hover:bg-duoc-yellow hover:text-duoc-blue transition cursor-pointer">
-                  Ver todos los apuntes
-                </button>
-              </div>
+              {notes.length === 0 ? (
+                <p className="text-gray-500 text-center">No hay apuntes publicados aún.</p>
+              ) : (
+                <div className="flex flex-col gap-6">
+                  {notes.map((note) => (
+                    <div key={note.id} className="bg-white p-6 rounded-xl shadow-md flex flex-col gap-3 hover:shadow-lg transition">
+                      <h3 className="text-xl font-bold text-duoc-blue">{note.title || "Sin título"}</h3>
+
+                      <span className="text-sm font-medium px-2 py-1 rounded-full bg-gray-200 text-gray-700 w-fit">
+                        {note.type === "text"
+                          ? "Texto"
+                          : note.type === "media"
+                          ? "Imagen/Video"
+                          : note.type === "link"
+                          ? "Enlace"
+                          : "Documento"}
+                      </span>
+
+                      {note.type === "text" && note.body && (
+                        <p className="text-gray-700">{note.body.length > 100 ? note.body.slice(0, 100) + "..." : note.body}</p>
+                      )}
+
+                      {note.description && (
+                        <p className="text-gray-700">{note.description.length > 100 ? note.description.slice(0, 100) + "..." : note.description}</p>
+                      )}
+
+                      {note.type === "link" && note.link && (
+                        <a href={note.link} target="_blank" rel="noopener noreferrer" className="!text-blue-600 underline">{note.link}</a>
+                      )}
+
+                      {note.tags.length > 0 && (
+                        <div className="flex flex-wrap gap-2 mt-2">
+                          {note.tags.map((tag) => (
+                            <span key={tag} className="bg-duoc-blue text-white px-2 py-1 rounded-full text-sm">#{tag}</span>
+                          ))}
+                        </div>
+                      )}
+
+                      <Link href={`/apuntes/${note.id}`} className="mt-2 inline-block px-4 py-2 bg-duoc-blue text-duoc-gray rounded-lg hover:bg-duoc-yellow hover:text-duoc-blue transition w-fit cursor-pointer">
+                        Ver más
+                      </Link>
+                    </div>
+                  ))}
+                </div>
+              )}
             </>
           )}
 
           {activeTab === "carpool" && (
-            <>
-              <div className="bg-white p-6 rounded-xl shadow-md">
-                <h3 className="text-xl font-bold text-duoc-blue mb-2">Viaje disponible 🚗</h3>
-                <p className="text-gray-700">María ofrece viaje desde Duoc a Placilla a las 22:30.</p>
-                <button className="mt-3 px-4 py-2 bg-duoc-blue text-white rounded-lg hover:bg-duoc-yellow hover:text-duoc-blue transition cursor-pointer">
-                  Unirme
-                </button>
-              </div>
-              <div className="bg-white p-6 rounded-xl shadow-md">
-                <h3 className="text-xl font-bold text-duoc-blue mb-2">Viaje a Valparaíso 🚙</h3>
-                <p className="text-gray-700">Andrés ofrece transporte desde Duoc a Valparaíso a las 21:00.</p>
-                <button className="mt-3 px-4 py-2 bg-duoc-blue text-white rounded-lg hover:bg-duoc-yellow hover:text-duoc-blue transition cursor-pointer">
-                  Unirme
-                </button>
-              </div>
-              <div className="bg-white p-6 rounded-xl shadow-md">
-                <h3 className="text-xl font-bold text-duoc-blue mb-2">Ruta a Recreo 🚌</h3>
-                <p className="text-gray-700">Sofía ofrece viaje desde Duoc a Recreo a las 20:30.</p>
-                <button className="mt-3 px-4 py-2 bg-duoc-blue text-white rounded-lg hover:bg-duoc-yellow hover:text-duoc-blue transition cursor-pointer">
-                  Unirme
-                </button>
-              </div>
-              {/* Botón ver todos */}
-              <div className="flex justify-center">
-                <button className="mt-4 px-6 py-2 bg-duoc-blue text-white font-semibold rounded-lg shadow-md hover:bg-duoc-yellow hover:text-duoc-blue transition cursor-pointer">
-                  Ver todos los viajes
-                </button>
-              </div>
-            </>
+            <div className="flex flex-col gap-4">
+              {carpoolExamples.map((trip) => (
+                <div key={trip.id} className="bg-white p-4 rounded-xl shadow-md hover:shadow-lg transition flex justify-between items-center">
+                  <div>
+                    <p className="font-semibold text-duoc-blue">{trip.from} → {trip.to}</p>
+                    <p className="text-gray-700 text-sm">Hora: {trip.time}</p>
+                  </div>
+                  <span className="bg-duoc-yellow text-duoc-blue font-semibold px-3 py-1 rounded-lg">{trip.seats} asientos</span>
+                </div>
+              ))}
+            </div>
           )}
 
           {activeTab === "tutoring" && (
-            <>
-              <div className="bg-white p-6 rounded-xl shadow-md">
-                <h3 className="text-xl font-bold text-duoc-blue mb-2">Nueva ayudantía 🎓</h3>
-                <p className="text-gray-700">Pedro se ofrece para ayudar en Matemáticas este viernes.</p>
-                <button className="mt-3 px-4 py-2 bg-duoc-blue text-white rounded-lg hover:bg-duoc-yellow hover:text-duoc-blue transition cursor-pointer">
-                  Participar
-                </button>
-              </div>
-              <div className="bg-white p-6 rounded-xl shadow-md">
-                <h3 className="text-xl font-bold text-duoc-blue mb-2">Solicitud: Ayudantía de Base de Datos 💻</h3>
-                <p className="text-gray-700">Ana solicita ayudantía: "Necesito ayuda con packages y triggers".</p>
-                <button className="mt-3 px-4 py-2 bg-duoc-blue text-white rounded-lg hover:bg-duoc-yellow hover:text-duoc-blue transition cursor-pointer">
-                  Participar
-                </button>
-              </div>
-              <div className="bg-white p-6 rounded-xl shadow-md">
-                <h3 className="text-xl font-bold text-duoc-blue mb-2">Ayudantía Química 🧪</h3>
-                <p className="text-gray-700">Carlos ayudará con ejercicios de Química General.</p>
-                <button className="mt-3 px-4 py-2 bg-duoc-blue text-white rounded-lg hover:bg-duoc-yellow hover:text-duoc-blue transition cursor-pointer">
-                  Participar
-                </button>
-              </div>
-              {/* Botón ver todos */}
-              <div className="flex justify-center">
-                <button className="mt-4 px-6 py-2 bg-duoc-blue text-white font-semibold rounded-lg shadow-md hover:bg-duoc-yellow hover:text-duoc-blue transition cursor-pointer">
-                  Ver todas las ayudantías
-                </button>
-              </div>
-            </>
+            <div className="flex flex-col gap-4">
+              {tutoringExamples.map((tutor) => (
+                <div key={tutor.id} className="bg-white p-4 rounded-xl shadow-md hover:shadow-lg transition flex justify-between items-center">
+                  <div>
+                    <p className="font-semibold text-duoc-blue">{tutor.subject}</p>
+                    <p className="text-gray-700 text-sm">Tutor: {tutor.tutor}</p>
+                    <p className="text-gray-700 text-sm">Fecha: {tutor.date}</p>
+                  </div>
+                  <span className="bg-duoc-yellow text-duoc-blue font-semibold px-3 py-1 rounded-lg">Disponible</span>
+                </div>
+              ))}
+            </div>
           )}
         </section>
 
-        {/* Columna derecha (Widgets) */}
+        {/* Columna derecha */}
         <aside className="hidden md:flex flex-col gap-4 bg-white p-4 rounded-xl shadow-md order-3">
           <h2 className="text-lg font-bold text-duoc-blue">Destacados</h2>
           <p className="text-gray-700">🚗 3 viajes disponibles hoy</p>
