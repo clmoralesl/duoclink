@@ -4,10 +4,16 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 
 export default function Register() {
-  const [form, setForm] = useState({ firstName: "", lastName: "", email: "", password: "" });
+  const [form, setForm] = useState({
+    firstName: "",
+    lastName: "",
+    email: "",
+    password: "",
+    school: "",
+  });
   const router = useRouter();
 
-  function handleChange(e: React.ChangeEvent<HTMLInputElement>) {
+  function handleChange(e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) {
     setForm({ ...form, [e.target.id]: e.target.value });
   }
 
@@ -35,8 +41,7 @@ export default function Register() {
               placeholder="Tu nombre"
               value={form.firstName}
               onChange={handleChange}
-              className="w-full px-4 py-2 border border-gray-300 
-              rounded-lg focus:outline-none focus:ring-2 focus:ring-duoc-yellow text-duoc-blue"
+              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-duoc-yellow text-duoc-blue"
             />
           </div>
 
@@ -50,9 +55,7 @@ export default function Register() {
               placeholder="Tu apellido"
               value={form.lastName}
               onChange={handleChange}
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg 
-              focus:outline-none focus:ring-2 focus:ring-duoc-yellow
-              text-duoc-blue"
+              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-duoc-yellow text-duoc-blue"
             />
           </div>
 
@@ -66,9 +69,7 @@ export default function Register() {
               placeholder="correo@duocuc.cl"
               value={form.email}
               onChange={handleChange}
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg 
-              focus:outline-none focus:ring-2 focus:ring-duoc-yellow
-              text-duoc-blue"
+              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-duoc-yellow text-duoc-blue"
             />
           </div>
 
@@ -82,10 +83,27 @@ export default function Register() {
               placeholder="********"
               value={form.password}
               onChange={handleChange}
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg 
-              focus:outline-none focus:ring-2 focus:ring-duoc-yellow
-              text-duoc-blue"
+              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-duoc-yellow text-duoc-blue"
             />
+          </div>
+
+          <div>
+            <label htmlFor="school" className="block text-duoc-blue font-medium mb-1">
+              Escuela
+            </label>
+            <select
+              id="school"
+              value={form.school}
+              onChange={handleChange}
+              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-duoc-yellow text-duoc-blue"
+            >
+              <option value="">Selecciona tu escuela</option>
+              <option value="Informática y Telecomunicaciones">Escuela de Informática y Telecomunicaciones</option>
+              <option value="Administración y Negocios">Escuela de Administración y Negocios</option>
+              <option value="Gastronomía y Turismo">Escuela de Gastronomía y Turismo</option>
+              <option value="Arte y Diseño">Escuela de Arte y Diseño</option>
+              <option value="Salud">Escuela de Salud</option>
+            </select>
           </div>
 
           <button
