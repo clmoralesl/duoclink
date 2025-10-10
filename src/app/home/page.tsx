@@ -142,18 +142,30 @@ export default function Home() {
             </>
           )}
 
+          {/* Tab: Viajes (Carpool) */}
           {activeTab === "carpool" && (
-            <div className="flex flex-col gap-4">
-              {carpoolExamples.map((trip) => (
-                <div key={trip.id} className="bg-white p-4 rounded-xl shadow-md hover:shadow-lg transition flex justify-between items-center">
-                  <div>
-                    <p className="font-semibold text-duoc-blue">{trip.from} → {trip.to}</p>
-                    <p className="text-gray-700 text-sm">Hora: {trip.time}</p>
+            <section>
+              <div className="flex flex-col gap-4">
+                {carpoolExamples.map((trip) => (
+                  <div key={trip.id} className="bg-white p-4 rounded-xl shadow-md hover:shadow-lg transition flex justify-between items-center">
+                    <div>
+                      <p className="font-semibold text-duoc-blue">{trip.from} → {trip.to}</p>
+                      <p className="text-gray-700 text-sm">Hora: {trip.time}</p>
+                    </div>
+                    <span className="bg-duoc-yellow text-duoc-blue font-semibold px-3 py-1 rounded-lg">{trip.seats} asientos</span>
                   </div>
-                  <span className="bg-duoc-yellow text-duoc-blue font-semibold px-3 py-1 rounded-lg">{trip.seats} asientos</span>
-                </div>
-              ))}
-            </div>
+                ))}
+              </div>
+
+              <div className="mt-6">
+                <Link
+                  href="/viajes"
+                  className="inline-flex items-center gap-2 bg-duoc-blue text-white px-4 py-2 rounded-lg font-semibold hover:bg-duoc-yellow hover:text-duoc-blue transition"
+                >
+                  Ir a Viajes
+                </Link>
+              </div>
+            </section>
           )}
 
           {activeTab === "tutoring" && (
