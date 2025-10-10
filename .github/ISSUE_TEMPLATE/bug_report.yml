@@ -1,0 +1,36 @@
+name: Bug
+description: Reportar un error
+labels: [bug, needs-triage]
+title: "[Bug]: "
+body:
+  - type: input
+    id: summary
+    attributes:
+      label: Resumen
+      placeholder: Descripción breve del problema
+    validations:
+      required: true
+  - type: textarea
+    id: steps
+    attributes:
+      label: Pasos para reproducir
+      placeholder: "1) Ir a..., 2) Click..., 3) Ocurre..."
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: Comportamiento esperado
+    validations:
+      required: true
+  - type: textarea
+    id: actual
+    attributes:
+      label: Resultado actual
+    validations:
+      required: true
+  - type: dropdown
+    id: severity
+    attributes:
+      label: Severidad
+      options: ["S1 - Crítico", "S2 - Alto", "S3 - Medio", "S4 - Bajo"]

@@ -1,0 +1,16 @@
+name: Task
+description: Tarea técnica o de mantenimiento
+labels: [task]
+title: "[Task]: "
+body:
+  - type: textarea
+    id: desc
+    attributes:
+      label: Descripción
+    validations:
+      required: true
+  - type: textarea
+    id: acceptance
+    attributes:
+      label: Hecho cuando
+      placeholder: Lista de criterios de aceptación

@@ -21,7 +21,7 @@ export default function Navbar() {
         {/* Menú de escritorio */}
         <div className="hidden md:flex items-center gap-5">
           <Link href="/apuntes" className="!text-duoc-white hover:!text-duoc-yellow">Apuntes</Link>
-          <Link href="#carpool" className="!text-duoc-white hover:!text-duoc-yellow">Viajes</Link>
+          <Link href="/viajes" className="!text-duoc-white hover:!text-duoc-yellow">Viajes</Link>
           <Link href="#tutoring" className="!text-duoc-white hover:!text-duoc-yellow">Ayudantías</Link>
         </div>
 
@@ -50,7 +50,7 @@ export default function Navbar() {
       {isOpen && (
         <div className="flex flex-col md:hidden bg-white dark:bg-duoc-blue px-4 pb-4 gap-2">
           <Link href="/apuntes" className="!text-duoc-white hover:!text-duoc-yellow">Apuntes</Link>
-          <Link href="#carpool" className="!text-duoc-white hover:!text-duoc-yellow">Viajes</Link>
+          <Link href="/viajes" className="!text-duoc-white hover:!text-duoc-yellow">Viajes</Link>
           <Link href="#tutoring" className="!text-duoc-white hover:!text-duoc-yellow">Ayudantías</Link>
         </div>
       )}
