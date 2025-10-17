@@ -1,9 +1,25 @@
-import { useState } from "react";
+"use client";
+import { useEffect, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { onAuthStateChanged, signOut } from "firebase/auth";
+import { auth } from "@/lib/firebase";
 
 export default function Navbar() {
   const [isOpen, setIsOpen] = useState(false);
+  const [loggedIn, setLoggedIn] = useState(false);
+  const router = useRouter();
+
+  useEffect(() => {
+    const unsub = onAuthStateChanged(auth, (user) => setLoggedIn(!!user));
+    return () => unsub();
+  }, []);
+
+  const handleLogout = async () => {
+    await signOut(auth);
+    router.push("/login");
+  };
 
   return (
     <nav className="fixed top-0 left-0 w-full bg-white dark:bg-duoc-blue shadow-md z-50">
@@ -22,7 +38,23 @@ export default function Navbar() {
         <div className="hidden md:flex items-center gap-5">
           <Link href="/apuntes" className="!text-duoc-white hover:!text-duoc-yellow">Apuntes</Link>
           <Link href="/viajes" className="!text-duoc-white hover:!text-duoc-yellow">Viajes</Link>
-          <Link href="#tutoring" className="!text-duoc-white hover:!text-duoc-yellow">Ayudantías</Link>
+          <Link href="/home#tutoring" className="!text-duoc-white hover:!text-duoc-yellow">Ayudantías</Link>
+
+          {loggedIn ? (
+            <button
+              onClick={handleLogout}
+              className="ml-4 px-4 py-2 rounded-lg bg-duoc-yellow text-duoc-blue font-semibold hover:bg-duoc-white hover:text-duoc-blue transition cursor-pointer"
+            >
+              Cerrar sesión
+            </button>
+          ) : (
+            <Link
+              href="/login"
+              className="ml-4 px-4 py-2 rounded-lg bg-duoc-yellow text-duoc-blue font-semibold hover:bg-duoc-white hover:text-duoc-blue transition"
+            >
+              Iniciar sesión
+            </Link>
+          )}
         </div>
 
         {/* Botón hamburguesa móvil */}
@@ -51,7 +83,23 @@ export default function Navbar() {
         <div className="flex flex-col md:hidden bg-white dark:bg-duoc-blue px-4 pb-4 gap-2">
           <Link href="/apuntes" className="!text-duoc-white hover:!text-duoc-yellow">Apuntes</Link>
           <Link href="/viajes" className="!text-duoc-white hover:!text-duoc-yellow">Viajes</Link>
-          <Link href="#tutoring" className="!text-duoc-white hover:!text-duoc-yellow">Ayudantías</Link>
+          <Link href="/home#tutoring" className="!text-duoc-white hover:!text-duoc-yellow">Ayudantías</Link>
+
+          {loggedIn ? (
+            <button
+              onClick={handleLogout}
+              className="mt-2 px-4 py-2 rounded-lg bg-duoc-yellow text-duoc-blue font-semibold hover:bg-duoc-white hover:text-duoc-blue transition cursor-pointer text-left"
+            >
+              Cerrar sesión
+            </button>
+          ) : (
+            <Link
+              href="/login"
+              className="mt-2 px-4 py-2 rounded-lg bg-duoc-yellow text-duoc-blue font-semibold hover:bg-duoc-white hover:text-duoc-blue transition"
+            >
+              Iniciar sesión
+            </Link>
+          )}
         </div>
       )}
     </nav>

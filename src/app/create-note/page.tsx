@@ -2,6 +2,9 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import { db, storage } from "@/lib/firebase";
+import { addDoc, collection, serverTimestamp } from "firebase/firestore";
+import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
 
 type NoteType = "text" | "media" | "link" | "document";
 
@@ -15,87 +18,112 @@ export default function CreateNote() {
   const [description, setDescription] = useState("");
   const [linkUrl, setLinkUrl] = useState("");
 
-  // Estado de errores por campo
-  const [errors, setErrors] = useState({
-    title: "",
-    body: "",
-    description: "",
-    linkUrl: "",
-  });
+  // archivos
+  const [mediaFile, setMediaFile] = useState<File | null>(null);
+  const [docFile, setDocFile] = useState<File | null>(null);
+
+  // estado UI
+  const [submitting, setSubmitting] = useState(false);
+  const [errors, setErrors] = useState({ title: "", body: "", description: "", linkUrl: "", file: "" });
 
   const addTag = () => {
     if (!tagInput.trim()) return;
-
     const newTags = tagInput
       .split(",")
       .map((t) => t.trim())
       .filter((t) => t && !tags.includes(t));
-
     if (newTags.length > 0) {
       setTags([...tags, ...newTags]);
       setTagInput("");
     }
   };
 
-  const removeTag = (tag: string) => {
-    setTags(tags.filter((t) => t !== tag));
-  };
+  const removeTag = (tag: string) => setTags(tags.filter((t) => t !== tag));
 
-  const handlePublish = () => {
-    // Inicializar errores
-    const newErrors = { title: "", body: "", description: "", linkUrl: "" };
+  async function uploadToStorage(file: File, kind: "media" | "document") {
+    const path = `notes/${kind}/${Date.now()}-${file.name}`;
+    const storageRef = ref(storage, path);
+    await uploadBytes(storageRef, file);
+    return getDownloadURL(storageRef);
+  }
+
+  const handlePublish = async () => {
+    const newErrors = { title: "", body: "", description: "", linkUrl: "", file: "" };
     let hasError = false;
 
     if (!title.trim()) {
       newErrors.title = "El título es obligatorio";
       hasError = true;
     }
-
     if (activeTab === "text" && !body.trim()) {
       newErrors.body = "El contenido del apunte es obligatorio";
       hasError = true;
     }
-
     if (activeTab === "link" && !linkUrl.trim()) {
       newErrors.linkUrl = "La URL es obligatoria";
       hasError = true;
     }
+    if (activeTab === "media" && !mediaFile) {
+      newErrors.file = "Debes seleccionar una imagen o video";
+      hasError = true;
+    }
+    if (activeTab === "document" && !docFile) {
+      newErrors.file = "Debes seleccionar un documento";
+      hasError = true;
+    }
 
-    // Opcional: description no obligatorio
     setErrors(newErrors);
-
     if (hasError) return;
 
-    const newNote = {
-      id: Date.now(),
-      type: activeTab,
-      title: title.trim(),
-      body: activeTab === "text" ? body.trim() : undefined,
-      description: activeTab !== "text" ? description.trim() : undefined,
-      link: activeTab === "link" ? linkUrl.trim() : undefined,
-      tags,
-    };
+    try {
+      setSubmitting(true);
 
-    const storedNotes = JSON.parse(localStorage.getItem("notes") || "[]");
-    storedNotes.push(newNote);
-    localStorage.setItem("notes", JSON.stringify(storedNotes));
+      // Definir "cuerpo" según el tipo:
+      // - text: contenido de texto
+      // - link: URL
+      // - media/document: URL subida a Storage
+      let cuerpo = "";
 
-    // Limpiar campos
-    setTitle("");
-    setBody("");
-    setDescription("");
-    setTags([]);
-    setTagInput("");
-    setLinkUrl("");
-    setErrors({ title: "", body: "", description: "", linkUrl: "" });
+      if (activeTab === "text") {
+        cuerpo = body.trim();
+      } else if (activeTab === "link") {
+        cuerpo = linkUrl.trim();
+      } else if (activeTab === "media" && mediaFile) {
+        cuerpo = await uploadToStorage(mediaFile, "media");
+      } else if (activeTab === "document" && docFile) {
+        cuerpo = await uploadToStorage(docFile, "document");
+      }
 
-    router.push("/apuntes");
+      await addDoc(collection(db, "notes"), {
+        titulo: title.trim(),
+        cuerpo,
+        tags,
+        tipo: activeTab,
+        creado: serverTimestamp(),
+      });
+
+      // limpiar y redirigir
+      setTitle("");
+      setBody("");
+      setDescription("");
+      setTags([]);
+      setTagInput("");
+      setLinkUrl("");
+      setMediaFile(null);
+      setDocFile(null);
+      setErrors({ title: "", body: "", description: "", linkUrl: "", file: "" });
+
+      router.push("/apuntes"); // ajusta a tu ruta de listado
+    } catch (e) {
+      setErrors((prev) => ({ ...prev, title: "Error al publicar. Intenta nuevamente." }));
+    } finally {
+      setSubmitting(false);
+    }
   };
 
   return (
     <main className="min-h-screen bg-duoc-gray pt-25 pb-10 px-4 text-duoc-blue">
       <div className="max-w-4xl mx-auto bg-white p-6 rounded-xl shadow-md flex flex-col gap-6">
-
         {/* Tabs */}
         <div className="flex gap-4 mb-4">
           {["text", "media", "link", "document"].map((tab) => (
@@ -106,13 +134,7 @@ export default function CreateNote() {
                 activeTab === tab ? "bg-duoc-blue text-white" : "!text-duoc-blue hover:bg-duoc-gray"
               }`}
             >
-              {tab === "text"
-                ? "Texto"
-                : tab === "media"
-                ? "Imagen / Video"
-                : tab === "link"
-                ? "Enlace"
-                : "Documento"}
+              {tab === "text" ? "Texto" : tab === "media" ? "Imagen / Video" : tab === "link" ? "Enlace" : "Documento"}
             </button>
           ))}
         </div>
@@ -179,14 +201,21 @@ export default function CreateNote() {
               className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 h-24 text-duoc-blue"
             />
             <label className="block font-semibold mb-2 text-duoc-blue">Subir imagen o video</label>
-            <input id="media-upload" type="file" accept="image/*,video/*" className="hidden" />
+            <input
+              id="media-upload"
+              type="file"
+              accept="image/*,video/*"
+              className="hidden"
+              onChange={(e) => setMediaFile(e.target.files?.[0] ?? null)}
+            />
             <label
               htmlFor="media-upload"
               className="inline-block px-4 py-2 bg-duoc-yellow text-duoc-blue font-semibold rounded-lg shadow-md hover:bg-duoc-blue hover:text-white transition cursor-pointer"
             >
               Seleccionar archivo
             </label>
-            <p className="mt-2 text-sm text-gray-600 text-duoc-blue">Formatos permitidos: JPG, PNG, MP4</p>
+            {mediaFile && <p className="text-sm mt-1">{mediaFile.name}</p>}
+            {errors.file && <p className="text-red-500 text-sm mt-1">{errors.file}</p>}
           </>
         )}
 
@@ -205,6 +234,7 @@ export default function CreateNote() {
               type="file"
               accept=".pdf,.doc,.docx,.ppt,.pptx,.xls,.xlsx"
               className="hidden"
+              onChange={(e) => setDocFile(e.target.files?.[0] ?? null)}
             />
             <label
               htmlFor="doc-upload"
@@ -212,9 +242,8 @@ export default function CreateNote() {
             >
               Seleccionar documento
             </label>
-            <p className="mt-2 text-sm text-gray-600 text-duoc-blue">
-              Formatos permitidos: PDF, Word, PowerPoint, Excel
-            </p>
+            {docFile && <p className="text-sm mt-1">{docFile.name}</p>}
+            {errors.file && <p className="text-red-500 text-sm mt-1">{errors.file}</p>}
           </>
         )}
 
@@ -253,9 +282,10 @@ export default function CreateNote() {
         {/* Publicar */}
         <button
           onClick={handlePublish}
-          className="mt-4 px-6 py-3 bg-duoc-blue text-white font-semibold rounded-lg shadow-md hover:bg-duoc-yellow hover:text-duoc-blue transition cursor-pointer"
+          disabled={submitting}
+          className="mt-4 px-6 py-3 bg-duoc-blue text-white font-semibold rounded-lg shadow-md hover:bg-duoc-yellow hover:text-duoc-blue transition cursor-pointer disabled:opacity-60"
         >
-          Publicar
+          {submitting ? "Publicando..." : "Publicar"}
         </button>
       </div>
     </main>

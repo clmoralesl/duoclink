@@ -12,4 +12,5 @@ Breve resumen del cambio.
 Pasos o screenshots.
 
 ## Referencias
+
 Closes #<número de issue>

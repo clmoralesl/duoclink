@@ -3,32 +3,44 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
 import Link from "next/link";
+import { auth } from "@/lib/firebase";
+import {
+  signInWithEmailAndPassword,
+  setPersistence,
+  browserLocalPersistence,
+} from "firebase/auth";
 
 export default function Login() {
   const [form, setForm] = useState({ email: "", password: "" });
   const [error, setError] = useState("");
+  const [loading, setLoading] = useState(false);
   const router = useRouter();
 
   function handleChange(e: React.ChangeEvent<HTMLInputElement>) {
     setForm({ ...form, [e.target.id]: e.target.value });
   }
 
-  function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
+  async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
-    const user = localStorage.getItem("duocUser");
-    if (user) {
-      const userData = JSON.parse(user);
-      if (
-        form.email === userData.email &&
-        form.password === userData.password
-      ) {
-        setError("");
-        router.push("/home"); // <-- Cambia aquí
-      } else {
-        setError("Correo o contraseña incorrectos.");
-      }
-    } else {
-      setError("No hay usuario registrado.");
+    setError("");
+    setLoading(true);
+    try {
+      await setPersistence(auth, browserLocalPersistence);
+      await signInWithEmailAndPassword(auth, form.email.trim(), form.password);
+      router.push("/home");
+    } catch (err: any) {
+      const code = err?.code as string;
+      const msg =
+        code === "auth/invalid-credential" || code === "auth/wrong-password"
+          ? "Correo o contraseña inválidos."
+          : code === "auth/user-not-found"
+          ? "Usuario no encontrado."
+          : code === "auth/too-many-requests"
+          ? "Demasiados intentos. Intenta más tarde."
+          : "No se pudo iniciar sesión. Intenta nuevamente.";
+      setError(msg);
+    } finally {
+      setLoading(false);
     }
   }
 
@@ -42,7 +54,10 @@ export default function Login() {
           </h1>
           <form className="flex flex-col gap-4" onSubmit={handleSubmit}>
             <div>
-              <label htmlFor="email" className="block text-duoc-blue font-medium mb-1">
+              <label
+                htmlFor="email"
+                className="block text-duoc-blue font-medium mb-1"
+              >
                 Correo
               </label>
               <input
@@ -51,12 +66,16 @@ export default function Login() {
                 placeholder="correo@duocuc.cl"
                 value={form.email}
                 onChange={handleChange}
+                required
                 className="w-full px-4 py-2 border border-gray-300 rounded-lg 
                 focus:outline-none focus:ring-2 focus:ring-duoc-yellow text-duoc-blue"
               />
             </div>
             <div>
-              <label htmlFor="password" className="block text-duoc-blue font-medium mb-1">
+              <label
+                htmlFor="password"
+                className="block text-duoc-blue font-medium mb-1"
+              >
                 Contraseña
               </label>
               <input
@@ -65,6 +84,7 @@ export default function Login() {
                 placeholder="********"
                 value={form.password}
                 onChange={handleChange}
+                required
                 className="w-full px-4 py-2 border border-gray-300 rounded-lg 
                 focus:outline-none focus:ring-2 focus:ring-duoc-yellow text-duoc-blue"
               />
@@ -74,14 +94,18 @@ export default function Login() {
             )}
             <button
               type="submit"
-              className="mt-4 w-full bg-duoc-blue text-white py-2 rounded-lg font-semibold hover:bg-duoc-yellow hover:text-duoc-blue transition"
+              disabled={loading}
+              className="mt-4 w-full bg-duoc-blue text-white py-2 rounded-lg font-semibold hover:bg-duoc-yellow hover:text-duoc-blue transition disabled:opacity-60"
             >
-              Entrar
+              {loading ? "Ingresando..." : "Entrar"}
             </button>
           </form>
           <p className="text-center text-duoc-blue mt-4">
             ¿No tienes cuenta?{" "}
-            <Link href="/register" className="text-duoc-yellow font-semibold hover:underline">
+            <Link
+              href="/register"
+              className="text-duoc-yellow font-semibold hover:underline"
+            >
               Regístrate
             </Link>
           </p>
