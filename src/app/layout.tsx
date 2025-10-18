@@ -34,7 +34,7 @@ export default function RootLayout({
 }) {
   return (
     <html lang="es">
-      <body className="bg-duoc-white dark:bg-duoc-blue text-duoc-blue dark:text-duoc-white">
+      <body className={`${geistSans.className} ${geistMono.className} antialiased`}>
         <ClientNavbarWrapper />
         <div>{children}</div>
         <Footer />
