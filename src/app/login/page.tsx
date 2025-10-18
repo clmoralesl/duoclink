@@ -28,8 +28,8 @@ export default function Login() {
       await setPersistence(auth, browserLocalPersistence);
       await signInWithEmailAndPassword(auth, form.email.trim(), form.password);
       router.push("/home");
-    } catch (err: any) {
-      const code = err?.code as string;
+    } catch (err: unknown) {
+      const code = (err as { code?: string })?.code ?? "unknown";
       const msg =
         code === "auth/invalid-credential" || code === "auth/wrong-password"
           ? "Correo o contraseña inválidos."

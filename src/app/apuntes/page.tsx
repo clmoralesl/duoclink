@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { db } from "@/lib/firebase";
-import { collection, getDocs, orderBy, query, limit } from "firebase/firestore";
+import { collection, getDocs, orderBy, query, limit, DocumentData } from "firebase/firestore";
 import AuthGuard from "@/components/AuthGuard";
 
 type Note = {
@@ -16,6 +16,16 @@ type Note = {
   createdAt?: Date;
 };
 
+type FirestoreNote = {
+  titulo?: string;
+  cuerpo?: string;
+  tags?: unknown;
+  tipo?: "text" | "media" | "link" | "document";
+  creado?: { toDate?: () => Date };
+};
+
+const isNonEmptyString = (v: unknown): v is string => typeof v === "string" && v.length > 0;
+
 export default function Apuntes() {
   const [notes, setNotes] = useState<Note[]>([]);
   const [loading, setLoading] = useState(true);
@@ -27,16 +37,17 @@ export default function Apuntes() {
       const q = query(ref, orderBy("creado", "desc"), limit(20));
       const snap = await getDocs(q);
       const items: Note[] = snap.docs.map((d) => {
-        const data = d.data() as any;
+        const data = d.data() as FirestoreNote;
         const tipo = (data.tipo ?? "text") as Note["type"];
         const cuerpo = typeof data.cuerpo === "string" ? data.cuerpo : "";
+        const tags = Array.isArray(data.tags) ? (data.tags as unknown[]).filter(isNonEmptyString) : [];
         return {
           id: d.id,
           type: tipo,
           title: data.titulo ?? "Sin título",
           body: tipo === "text" ? cuerpo : undefined,
           link: tipo === "link" ? cuerpo : undefined,
-          tags: Array.isArray(data.tags) ? data.tags.filter(Boolean) : [],
+          tags,
           createdAt: data.creado?.toDate?.() ?? undefined,
         };
       });

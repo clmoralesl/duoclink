@@ -11,15 +11,12 @@ export default function AuthGuard({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     const unsub = onAuthStateChanged(auth, (user) => {
-      if (!user) {
-        router.replace("/login");
-      } else {
-        setReady(true);
-      }
+      if (!user) router.replace("/login");
+      else setReady(true);
     });
     return () => unsub();
   }, [router]);
 
-  if (!ready) return null; // opcional: loader
+  if (!ready) return null; // loader opcional
   return <>{children}</>;
 }
