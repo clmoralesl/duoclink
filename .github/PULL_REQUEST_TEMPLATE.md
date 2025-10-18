@@ -12,5 +12,5 @@ Breve resumen del cambio.
 Pasos o screenshots.
 
 ## Referencias
-- Agregar número de issue si está completado para cerrarlo automáticamente
+- Agregar número de issue si está completado para cerrarlo automáticamente (Closes #1 por ejemplo)
 Closes #<número de issue>
