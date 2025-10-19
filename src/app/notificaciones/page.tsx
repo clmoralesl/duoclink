@@ -2,6 +2,7 @@
 "use client";
 
 import Link from "next/link";
+import BackButton from "@/components/BackButton";
 
 type Notification = {
     id: string;
@@ -87,14 +88,7 @@ export default function NotificacionesPage() {
                 </div>
 
                 {/* Botón Volver igual al de Perfil */}
-                <div className="mt-6 flex justify-center">
-                    <Link
-                        href="/home"
-                        className="px-4 py-2 border border-gray-300 rounded-lg !text-black hover:bg-gray-50"
-                    >
-                        Volver
-                    </Link>
-                </div>
+                <BackButton href="/home"/>
             </div>
         </main>
     );

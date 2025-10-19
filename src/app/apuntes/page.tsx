@@ -5,6 +5,7 @@ import Link from "next/link";
 import { db } from "@/lib/firebase";
 import { collection, getDocs, orderBy, query, limit, DocumentData } from "firebase/firestore";
 import AuthGuard from "@/components/AuthGuard";
+import BackButton from "@/components/BackButton";
 
 type Note = {
   id: string;
@@ -155,6 +156,7 @@ export default function Apuntes() {
               ))}
             </div>
           )}
+          <BackButton href="/home"/>
         </div>
       </main>
     </AuthGuard>

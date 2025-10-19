@@ -5,6 +5,7 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import { onAuthStateChanged } from "firebase/auth";
 import { auth } from "@/lib/firebase";
+import BackButton from "@/components/BackButton";
 
 type User = {
     firstName?: string;
@@ -136,12 +137,7 @@ export default function PerfilPage() {
                     >
                         Editar perfil
                     </Link>
-                    <Link
-                        href="/home"
-                        className="px-4 py-2 border border-gray-300 rounded-lg !text-black hover:bg-gray-50"
-                    >
-                        Volver
-                    </Link>
+                    <BackButton href="/home" layout="inline" variant="secondary" />
                 </div>
             </div>
         </main>
