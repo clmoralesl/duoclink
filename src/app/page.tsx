@@ -6,9 +6,25 @@ export default function Home() {
     <main className="bg-duoc-gray text-duoc-blue">
       {/* Hero Section */}
       <section
-        className="flex flex-col items-center justify-center bg-duoc-yellow text-duoc-blue px-6 text-center"
+        className="relative flex flex-col items-center justify-center bg-duoc-yellow text-duoc-blue px-6 text-center"
         style={{ minHeight: "calc(100vh - 80px)" }}
       >
+        {/* Botones superiores */}
+        <div className="absolute top-6 right-6 flex gap-4">
+          <Link
+            href="/login"
+            className="px-4 py-2 bg-duoc-blue !text-white font-semibold rounded-lg shadow-md hover:bg-white hover:!text-duoc-blue transition w-full sm:w-auto"
+          >
+            Iniciar sesión
+          </Link>
+          <Link
+            href="/register"
+            className="px-4 py-2 bg-duoc-blue !text-white font-semibold rounded-lg shadow-md hover:bg-white hover:!text-duoc-blue transition w-full sm:w-auto"
+          >
+            Registrarse
+          </Link>
+        </div>
+
         <h1 className="text-4xl sm:text-5xl md:text-6xl font-bold flex flex-col md:flex-row items-center gap-3 text-center">
           Bienvenido a
           <Image
@@ -25,8 +41,10 @@ export default function Home() {
       </section>
 
       {/* Ayudantías Section */}
-      <section className="flex flex-col md:flex-row items-center justify-between px-6 md:px-10 py-20
-        bg-gradient-to-b from-duoc-yellow to-duoc-white text-duoc-blue">
+      <section
+        className="flex flex-col md:flex-row items-center justify-between px-6 md:px-10 py-20
+        bg-gradient-to-b from-duoc-yellow to-duoc-white text-duoc-blue"
+      >
         <div className="md:w-1/2">
           <h2 className="text-2xl sm:text-3xl font-bold mb-4">Ayudantías</h2>
           <p className="text-base sm:text-lg md:text-xl">
@@ -46,10 +64,14 @@ export default function Home() {
       </section>
 
       {/* Apuntes Section */}
-      <section className="flex flex-col md:flex-row-reverse items-center justify-between px-6 md:px-10 py-20
-        bg-gradient-to-b from-duoc-white to-duoc-gray text-duoc-blue">
+      <section
+        className="flex flex-col md:flex-row-reverse items-center justify-between px-6 md:px-10 py-20
+        bg-gradient-to-b from-duoc-white to-duoc-gray text-duoc-blue"
+      >
         <div className="md:w-1/2">
-          <h2 className="text-2xl sm:text-3xl font-bold mb-4">Apuntes y Recursos</h2>
+          <h2 className="text-2xl sm:text-3xl font-bold mb-4">
+            Apuntes y Recursos
+          </h2>
           <p className="text-base sm:text-lg md:text-xl">
             Comparte y descarga apuntes, videos o archivos importantes para tu
             carrera. Comenta y vota el mejor contenido.
@@ -67,10 +89,14 @@ export default function Home() {
       </section>
 
       {/* Transporte Section */}
-      <section className="flex flex-col md:flex-row items-center justify-between px-6 md:px-10 py-20
-        bg-gradient-to-b from-duoc-gray to-duoc-blue text-white">
+      <section
+        className="flex flex-col md:flex-row items-center justify-between px-6 md:px-10 py-20
+        bg-gradient-to-b from-duoc-gray to-duoc-blue text-white"
+      >
         <div className="md:w-1/2">
-          <h2 className="text-2xl sm:text-3xl font-bold mb-4">Movilización Compartida</h2>
+          <h2 className="text-2xl sm:text-3xl font-bold mb-4">
+            Movilización Compartida
+          </h2>
           <p className="text-base sm:text-lg md:text-xl">
             Publica tus rutas en auto y ofrece transporte a tus compañeros.
             ¡Conecta con quienes comparten tu camino!
@@ -93,8 +119,10 @@ export default function Home() {
           ¿Listo para comenzar?
         </h2>
         <Link href="/register" className="w-full sm:w-auto">
-          <button className="px-6 py-3 bg-duoc-white text-duoc-blue font-semibold rounded-lg shadow-md
-            hover:bg-duoc-yellow hover:text-duoc-blue transition w-full sm:w-auto">
+          <button
+            className="px-6 py-3 bg-duoc-white text-duoc-blue font-semibold rounded-lg shadow-md
+            hover:bg-duoc-yellow hover:text-duoc-blue transition w-full sm:w-auto"
+          >
             Empezar
           </button>
         </Link>
