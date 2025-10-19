@@ -6,6 +6,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { onAuthStateChanged, signOut } from "firebase/auth";
 import { auth } from "@/lib/firebase";
+import NotificationsBell from "@/components/NotificationsBell";
 
 type User = {
   firstName?: string;
@@ -80,7 +81,10 @@ export default function Navbar() {
           </Link>
 
           {loggedIn && user && (
-            <div className="flex items-center gap-3 ml-4">
+            <div className="flex items-center gap-4 ml-4">
+              {/* Campanita de notificaciones */}
+              <NotificationsBell />
+
               {/* Imagen de perfil o iniciales */}
               <div className="w-10 h-10 rounded-full overflow-hidden border-2 border-duoc-yellow bg-white flex items-center justify-center text-duoc-blue font-semibold">
                 {user.avatarUrl ? (
