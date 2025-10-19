@@ -118,7 +118,7 @@ export default function Home() {
         <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold mb-6">
           ¿Listo para comenzar?
         </h2>
-        <Link href="/register" className="w-full sm:w-auto">
+        <Link href="/login" className="w-full sm:w-auto">
           <button
             className="px-6 py-3 bg-duoc-white text-duoc-blue font-semibold rounded-lg shadow-md
             hover:bg-duoc-yellow hover:text-duoc-blue transition w-full sm:w-auto"
