@@ -6,7 +6,6 @@ import { db, storage } from "@/lib/firebase";
 import { addDoc, collection, serverTimestamp } from "firebase/firestore";
 import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
 import AuthGuard from "@/components/AuthGuard";
-import BackButton from "@/components/BackButton";
 
 type NoteType = "text" | "media" | "link" | "document";
 
