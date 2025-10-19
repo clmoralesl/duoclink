@@ -133,9 +133,8 @@ export default function CreateNote() {
               <button
                 key={tab}
                 onClick={() => setActiveTab(tab as NoteType)}
-                className={`px-4 py-2 rounded-lg font-semibold transition cursor-pointer ${
-                  activeTab === tab ? "bg-duoc-blue text-white" : "!text-duoc-blue hover:bg-duoc-gray"
-                }`}
+                className={`px-4 py-2 rounded-lg font-semibold transition cursor-pointer ${activeTab === tab ? "bg-duoc-blue text-white" : "!text-duoc-blue hover:bg-duoc-gray"
+                  }`}
               >
                 {tab === "text" ? "Texto" : tab === "media" ? "Imagen / Video" : tab === "link" ? "Enlace" : "Documento"}
               </button>
@@ -149,9 +148,8 @@ export default function CreateNote() {
               placeholder="Título del apunte *"
               value={title}
               onChange={(e) => setTitle(e.target.value)}
-              className={`w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 ${
-                errors.title ? "border-red-500 focus:ring-red-500" : "border-gray-300 focus:ring-duoc-yellow"
-              } text-duoc-blue`}
+              className={`w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 ${errors.title ? "border-red-500 focus:ring-red-500" : "border-gray-300 focus:ring-duoc-yellow"
+                } text-duoc-blue`}
             />
             {errors.title && <p className="text-red-500 text-sm">{errors.title}</p>}
           </div>
@@ -163,9 +161,8 @@ export default function CreateNote() {
                 placeholder="Escribe tu apunte aquí *"
                 value={body}
                 onChange={(e) => setBody(e.target.value)}
-                className={`w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 h-48 text-duoc-blue ${
-                  errors.body ? "border-red-500 focus:ring-red-500" : "border-gray-300 focus:ring-duoc-yellow"
-                }`}
+                className={`w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 h-48 text-duoc-blue ${errors.body ? "border-red-500 focus:ring-red-500" : "border-gray-300 focus:ring-duoc-yellow"
+                  }`}
               />
               {errors.body && <p className="text-red-500 text-sm">{errors.body}</p>}
             </div>
@@ -185,9 +182,8 @@ export default function CreateNote() {
                   placeholder="https:// *"
                   value={linkUrl}
                   onChange={(e) => setLinkUrl(e.target.value)}
-                  className={`w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 text-duoc-blue ${
-                    errors.linkUrl ? "border-red-500 focus:ring-red-500" : "border-gray-300 focus:ring-duoc-yellow"
-                  }`}
+                  className={`w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 text-duoc-blue ${errors.linkUrl ? "border-red-500 focus:ring-red-500" : "border-gray-300 focus:ring-duoc-yellow"
+                    }`}
                 />
                 {errors.linkUrl && <p className="text-red-500 text-sm">{errors.linkUrl}</p>}
               </div>
@@ -290,8 +286,13 @@ export default function CreateNote() {
           >
             {submitting ? "Publicando..." : "Publicar"}
           </button>
+          <button
+            onClick={() => router.back()}
+            className="mt-6 px-6 py-2 border border-gray-300 rounded-lg text-black hover:bg-gray-100 transition font-mono text-lg"
+          >
+            Volver
+          </button>
         </div>
-        <BackButton href="/home"/>
       </main>
     </AuthGuard>
   );
