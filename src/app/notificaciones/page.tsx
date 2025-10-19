@@ -1,4 +1,4 @@
-// src/app/notificaciones/page.tsx
+
 "use client";
 
 import Link from "next/link";

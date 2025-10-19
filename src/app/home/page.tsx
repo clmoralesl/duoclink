@@ -1,18 +1,10 @@
+// src/app/home/page.tsx
 "use client";
 
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import Link from "next/link";
 import AuthGuard from "@/components/AuthGuard";
-
-type Note = {
-  id: number;
-  type: "text" | "media" | "link" | "document";
-  title: string;
-  body?: string;
-  description?: string;
-  link?: string; // Para tipo link
-  tags: string[];
-};
+import HomeNotasFeed from "@/components/HomeNotasFeed";
 
 type Carpool = {
   id: number;
@@ -31,8 +23,7 @@ type Tutoring = {
 
 export default function Home() {
   const [activeTab, setActiveTab] = useState<"notes" | "carpool" | "tutoring">("notes");
-  const [notes, setNotes] = useState<Note[]>([]);
-  
+
   // Ejemplos simulados
   const carpoolExamples: Carpool[] = [
     { id: 1, from: "Valparaíso", to: "Viña del Mar", time: "08:30 AM", seats: 3 },
@@ -43,12 +34,6 @@ export default function Home() {
     { id: 1, subject: "Matemáticas", date: "2025-09-15 10:00", tutor: "Juan Pérez" },
     { id: 2, subject: "Programación", date: "2025-09-16 15:00", tutor: "María Gómez" },
   ];
-
-  // Cargar apuntes desde localStorage
-  useEffect(() => {
-    const storedNotes = JSON.parse(localStorage.getItem("notes") || "[]");
-    setNotes(storedNotes);
-  }, []);
 
   return (
     <AuthGuard>
@@ -72,16 +57,15 @@ export default function Home() {
                 <button
                   key={tab}
                   onClick={() => setActiveTab(tab as typeof activeTab)}
-                  className={`px-4 py-2 rounded-lg font-semibold transition cursor-pointer ${
-                    activeTab === tab ? "bg-duoc-blue text-white" : "!text-duoc-blue hover:bg-duoc-gray"
-                  }`}
+                  className={`px-4 py-2 rounded-lg font-semibold transition cursor-pointer ${activeTab === tab ? "bg-duoc-blue text-white" : "!text-duoc-blue hover:bg-duoc-gray"
+                    }`}
                 >
                   {tab === "notes" ? "Apuntes" : tab === "carpool" ? "Viajes" : "Ayudantías"}
                 </button>
               ))}
             </div>
 
-            {/* Botón nuevo apunte */}
+            {/* Botón nuevo apunte (se mantiene) */}
             {activeTab === "notes" && (
               <div className="flex justify-start">
                 <Link
@@ -95,53 +79,8 @@ export default function Home() {
 
             {/* Contenido según tab activo */}
             {activeTab === "notes" && (
-              <>
-                {notes.length === 0 ? (
-                  <p className="text-gray-500 text-center">No hay apuntes publicados aún.</p>
-                ) : (
-                  <div className="flex flex-col gap-6">
-                    {notes.map((note) => (
-                      <div key={note.id} className="bg-white p-6 rounded-xl shadow-md flex flex-col gap-3 hover:shadow-lg transition">
-                        <h3 className="text-xl font-bold text-duoc-blue">{note.title || "Sin título"}</h3>
-
-                        <span className="text-sm font-medium px-2 py-1 rounded-full bg-gray-200 text-gray-700 w-fit">
-                          {note.type === "text"
-                            ? "Texto"
-                            : note.type === "media"
-                            ? "Imagen/Video"
-                            : note.type === "link"
-                            ? "Enlace"
-                            : "Documento"}
-                        </span>
-
-                        {note.type === "text" && note.body && (
-                          <p className="text-gray-700">{note.body.length > 100 ? note.body.slice(0, 100) + "..." : note.body}</p>
-                        )}
-
-                        {note.description && (
-                          <p className="text-gray-700">{note.description.length > 100 ? note.description.slice(0, 100) + "..." : note.description}</p>
-                        )}
-
-                        {note.type === "link" && note.link && (
-                          <a href={note.link} target="_blank" rel="noopener noreferrer" className="!text-blue-600 underline">{note.link}</a>
-                        )}
-
-                        {note.tags.length > 0 && (
-                          <div className="flex flex-wrap gap-2 mt-2">
-                            {note.tags.map((tag) => (
-                              <span key={tag} className="bg-duoc-blue text-white px-2 py-1 rounded-full text-sm">#{tag}</span>
-                            ))}
-                          </div>
-                        )}
-
-                        <Link href={`/apuntes/${note.id}`} className="mt-2 inline-block px-4 py-2 bg-duoc-blue text-duoc-gray rounded-lg hover:bg-duoc-yellow hover:text-duoc-blue transition w-fit cursor-pointer">
-                          Ver más
-                        </Link>
-                      </div>
-                    ))}
-                  </div>
-                )}
-              </>
+              // Lista de apuntes desde Firestore (clic a /apuntes/[id])
+              <HomeNotasFeed max={6} />
             )}
 
             {/* Tab: Viajes (Carpool) */}
@@ -170,6 +109,7 @@ export default function Home() {
               </section>
             )}
 
+            {/* Tab: Ayudantías */}
             {activeTab === "tutoring" && (
               <div className="flex flex-col gap-4">
                 {tutoringExamples.map((tutor) => (
