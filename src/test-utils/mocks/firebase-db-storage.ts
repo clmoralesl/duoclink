@@ -1,11 +1,5 @@
 import { vi } from "vitest";
 
-/**
- * Mocks simples para Firestore y Storage usados en tests.
- * Evitar genéricos complejos en vi.fn para no provocar errores de tipado.
- */
-
-// Spies (sin genéricos para evitar errores de TS)
 export const addDocSpy = vi.fn(async (_colRef: any, _data: any): Promise<void> => { });
 export const collectionSpy = vi.fn((_db: any, _col: string) => ({ col: _col }));
 
