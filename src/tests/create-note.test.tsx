@@ -2,7 +2,6 @@ import { render, screen, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 
-// 👉 Mocks ANTES del componente
 import '@/test-utils/mocks/router'
 import '@/test-utils/mocks/firebase-db-storage'
 import { addDocSpy, collectionSpy, serverTimestampMock, uploadBytesSpy, getDownloadURLSpy } from '@/test-utils/mocks/firebase-db-storage'
