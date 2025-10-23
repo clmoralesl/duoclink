@@ -82,7 +82,7 @@ export default function Apuntes() {
           <div className="flex justify-start">
             <Link
               href="/create-note"
-              className="mb-4 px-4 py-2 bg-duoc-yellow text-duoc-blue font-semibold rounded-lg shadow-md hover:bg-duoc-blue hover:text-white transition cursor-pointer"
+              className="mb-4 px-4 py-2 bg-duoc-yellow text-duoc-blue font-semibold rounded-lg shadow-md hover:bg-duoc-blue hover:!text-white transition cursor-pointer"
             >
               Publicar nuevo apunte
             </Link>

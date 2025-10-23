@@ -79,10 +79,7 @@ export default function CreateNote() {
     try {
       setSubmitting(true);
 
-      // Definir "cuerpo" según el tipo:
-      // - text: contenido de texto
-      // - link: URL
-      // - media/document: URL subida a Storage
+
       let cuerpo = "";
 
       if (activeTab === "text") {

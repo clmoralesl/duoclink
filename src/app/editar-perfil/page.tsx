@@ -1,9 +1,10 @@
-
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import BackButton from "@/components/BackButton";
+import { onAuthStateChanged } from "firebase/auth";
+import { auth } from "@/lib/firebase";
 
 type User = {
     firstName?: string;
@@ -37,33 +38,33 @@ export default function EditarPerfilPage() {
     const router = useRouter();
 
     useEffect(() => {
-        // Se intenta leer el usuario almacenado localmente y se precargan los campos del formulario
-        try {
-            const raw = localStorage.getItem("duocUser");
-            const u: User | null = raw ? JSON.parse(raw) : null;
-
-            if (!u) {
-                // En ausencia de usuario, se redirige al login para mantener consistencia de flujo
+        setLoading(true);
+        const unsub = onAuthStateChanged(auth, (user) => {
+            if (user) {
+                // Usuario autenticado: precargar datos si existen en localStorage
+                setEmail(user.email ?? "");
+                try {
+                    const raw = localStorage.getItem("duocUser");
+                    const u: User | null = raw ? JSON.parse(raw) : null;
+                    setForm({
+                        firstName: u?.firstName ?? "",
+                        lastName: u?.lastName ?? "",
+                        school: u?.school ?? "",
+                    });
+                    setAvatarUrl(u?.avatarUrl ?? "");
+                } catch {
+                    setForm({ firstName: "", lastName: "", school: "" });
+                    setAvatarUrl("");
+                } finally {
+                    setLoading(false);
+                }
+            } else {
+                // No autenticado -> redirigir a login
+                setLoading(false);
                 router.replace("/login?next=/editar-perfil");
-                return;
             }
-
-            setForm({
-                firstName: u.firstName ?? "",
-                lastName: u.lastName ?? "",
-                school: u.school ?? "",
-            });
-
-            setAvatarUrl(u.avatarUrl ?? "");
-            setEmail(u.email ?? "");
-        } catch {
-            // En caso de error de parseo, se limpia el estado
-            setForm({ firstName: "", lastName: "", school: "" });
-            setAvatarUrl("");
-            setEmail("");
-        } finally {
-            setLoading(false);
-        }
+        });
+        return () => unsub();
     }, [router]);
 
     // Iniciales derivadas del nombre/apellido o del correo como respaldo
@@ -110,6 +111,9 @@ export default function EditarPerfilPage() {
 
             // Se persiste el usuario actualizado en localStorage
             localStorage.setItem("duocUser", JSON.stringify(updated));
+
+            // Notifica a otros componentes (Navbar) en la misma pestaña
+            window.dispatchEvent(new CustomEvent("duocUser:updated", { detail: updated }));
 
             setSaved(true);
 

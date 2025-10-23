@@ -44,6 +44,32 @@ export default function Navbar() {
     return () => unsub();
   }, []);
 
+  // Escucha actualizaciones del perfil guardadas en Editar Perfil
+  useEffect(() => {
+    const onUpdated = (e: Event) => {
+      const detail = (e as CustomEvent<User>).detail;
+      if (!detail) return;
+      setUser((prev) => ({ ...(prev ?? {}), ...detail }));
+    };
+    const onStorage = (e: StorageEvent) => {
+      if (e.key === "duocUser") {
+        try {
+          const next = e.newValue ? JSON.parse(e.newValue) : null;
+          if (next) setUser((prev) => ({ ...(prev ?? {}), ...next }));
+        } catch {
+          /* noop */
+        }
+      }
+    };
+
+    window.addEventListener("duocUser:updated", onUpdated as EventListener);
+    window.addEventListener("storage", onStorage);
+    return () => {
+      window.removeEventListener("duocUser:updated", onUpdated as EventListener);
+      window.removeEventListener("storage", onStorage);
+    };
+  }, []);
+
   const handleLogout = async () => {
     await signOut(auth);
     router.push("/login");
@@ -51,7 +77,7 @@ export default function Navbar() {
 
   // Genera iniciales si no hay imagen de perfil
   const initials =
-    (user?.firstName?.[0] ?? "") + (user?.lastName?.[0] ?? "") || "DU";
+    (user?.firstName?.[0] ?? "") + (user?.lastName?.[0] ?? "") || "CM";
 
   return (
     <nav className="fixed top-0 left-0 w-full bg-duoc-blue text-white shadow-md z-50">
@@ -73,9 +99,6 @@ export default function Navbar() {
           <Link href="/viajes" className="hover:text-duoc-yellow">
             Viajes
           </Link>
-          <Link href="/perfil" className="hover:text-duoc-yellow">
-            Perfil
-          </Link>
           <Link href="/home#tutoring" className="hover:text-duoc-yellow">
             Ayudantías
           </Link>
@@ -84,6 +107,14 @@ export default function Navbar() {
             <div className="flex items-center gap-4 ml-4">
               {/* Campanita de notificaciones */}
               <NotificationsBell />
+
+              {/* Botón Perfil (nuevo) */}
+              <Link
+                href="/perfil"
+                className="px-3 py-1 rounded-lg border-2 border-duoc-yellow text-duoc-yellow font-semibold hover:bg-duoc-yellow hover:text-duoc-blue transition"
+              >
+                Perfil
+              </Link>
 
               {/* Imagen de perfil o iniciales */}
               <div className="w-10 h-10 rounded-full overflow-hidden border-2 border-duoc-yellow bg-white flex items-center justify-center text-duoc-blue font-semibold">
