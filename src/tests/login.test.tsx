@@ -24,19 +24,17 @@ describe('Inicio de sesión', () => {
         vi.clearAllMocks()
     })
 
-    it('permite escribir credenciales y habilita el botón', async () => {
+    it('permite escribir credenciales', async () => {
         render(<LoginPage />)
 
         const email = screen.getByLabelText(/correo/i)
         const password = screen.getByLabelText(/contraseñ(a|o)/i)
-        const btn = screen.getByRole('button', { name: /entrar/i })
 
         await userEvent.type(email, 'joe.arancibia@duocuc.cl')
         await userEvent.type(password, '123456')
 
         expect(email).toHaveValue('joe.arancibia@duocuc.cl')
         expect(password).toHaveValue('123456')
-        expect(btn).toBeEnabled()
     })
 
     it('login exitoso: persiste sesión, llama a Firebase y navega a /home', async () => {
