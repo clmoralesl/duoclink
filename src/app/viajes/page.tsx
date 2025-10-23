@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import AuthGuard from "@/components/AuthGuard";
+import BackButton from "@/components/BackButton";
 
 type Trip = {
   id: number;
@@ -45,7 +46,7 @@ export default function ViajesPage() {
 
   return (
     <AuthGuard>
-      <main className="min-h-screen bg-duoc-gray text-duoc-blue pt-24 px-4 md:px-8">
+      <main className="min-h-screen bg-duoc-gray pt-25 pb-10 px-4 text-duoc-blue">
         <section className="max-w-7xl mx-auto">
           <h1 className="text-3xl md:text-4xl font-bold mb-2">Viajes</h1>
           <p className="text-duoc-blue/80 mb-8">
@@ -164,6 +165,7 @@ export default function ViajesPage() {
               ))}
             </div>
           </div>
+          <BackButton href="/home"/>
         </section>
       </main>
     </AuthGuard>
