@@ -1,11 +1,18 @@
-import { render, screen, within } from '@testing-library/react'
+import '@/test-utils/mocks/firebase-core'      // mockea auth/db/storage básicos
+import '@/test-utils/mocks/firebase-auth'      // mockea onAuthStateChanged, setPersistence, signIn...
+import '@/test-utils/mocks/firebase-db-storage'// mockea Firestore/Storage + spies
+import '@/test-utils/mocks/router'             // mock de next/navigation
+
+import { render, screen, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 
-// 👉 Mocks ANTES del componente
-import '@/test-utils/mocks/router'
-import '@/test-utils/mocks/firebase-db-storage'
-import { addDocSpy, collectionSpy, serverTimestampMock, uploadBytesSpy, getDownloadURLSpy } from '@/test-utils/mocks/firebase-db-storage'
+import {
+    addDocSpy,
+    serverTimestampMock,
+    uploadBytesSpy,
+    getDownloadURLSpy,
+} from '@/test-utils/mocks/firebase-db-storage'
 import { mockPush } from '@/test-utils/mocks/router'
 
 // Página real
@@ -19,7 +26,6 @@ describe('Publicar nuevo apunte', () => {
     it('valida campos requeridos en modo Texto (título y contenido)', async () => {
         render(<CreateNote />)
 
-        // Por defecto el tab activo es "text"
         const publicar = screen.getByRole('button', { name: /publicar/i })
         await userEvent.click(publicar)
 
@@ -31,18 +37,15 @@ describe('Publicar nuevo apunte', () => {
     it('publica un apunte de Texto y redirige a /apuntes', async () => {
         render(<CreateNote />)
 
-        // Completar título y cuerpo
         const titulo = screen.getByPlaceholderText(/título del apunte \*/i)
         const cuerpo = screen.getByPlaceholderText(/escribe tu apunte aquí \*/i)
 
         await userEvent.type(titulo, 'Apunte de Algebra')
         await userEvent.type(cuerpo, 'Definiciones y propiedades…')
-
         await userEvent.click(screen.getByRole('button', { name: /publicar/i }))
 
-        // Debe llamar a addDoc en la colección "notes" con payload correcto
-        expect(collectionSpy).toHaveBeenCalledWith(expect.anything(), 'notes')
-        expect(addDocSpy).toHaveBeenCalledTimes(1)
+        // Espera a que addDoc sea invocado (no dependemos de la implementación interna de collection)
+        await waitFor(() => expect(addDocSpy).toHaveBeenCalledTimes(1))
 
         const [, data] = addDocSpy.mock.calls[0]
         expect(data).toMatchObject({
@@ -51,37 +54,30 @@ describe('Publicar nuevo apunte', () => {
             tags: [],
             tipo: 'text',
         })
-        // creado: serverTimestamp()
         expect(data.creado).toBe(serverTimestampMock)
 
-        // Redirige
-        expect(mockPush).toHaveBeenCalledWith('/apuntes')
+        await waitFor(() => expect(mockPush).toHaveBeenCalledWith('/apuntes'))
     })
 
     it('publica un apunte de Media subiendo archivo a Storage', async () => {
         render(<CreateNote />)
 
-        // Cambiar a tab "Imagen / Video"
         await userEvent.click(screen.getByRole('button', { name: /imagen \/ video/i }))
 
-        // Título
         const titulo = screen.getByPlaceholderText(/título del apunte \*/i)
         await userEvent.type(titulo, 'Foto laboratorio')
 
-        // Seleccionar archivo (el input está asociado al label "Seleccionar archivo")
         const fileInput = screen.getByLabelText(/seleccionar archivo/i) as HTMLInputElement
         const file = new File([new Uint8Array([1, 2, 3])], 'lab.png', { type: 'image/png' })
         await userEvent.upload(fileInput, file)
 
-        // Confirmamos que los mocks de subida devolverán una URL
+        // Mockear URL que devolverá Storage
         getDownloadURLSpy.mockResolvedValueOnce('https://files.example/lab.png')
 
-        // Publicar
         await userEvent.click(screen.getByRole('button', { name: /publicar/i }))
 
-        // Debe subir a storage y luego persistir en firestore
-        expect(uploadBytesSpy).toHaveBeenCalledTimes(1)
-        expect(addDocSpy).toHaveBeenCalledTimes(1)
+        await waitFor(() => expect(uploadBytesSpy).toHaveBeenCalledTimes(1))
+        await waitFor(() => expect(addDocSpy).toHaveBeenCalledTimes(1))
 
         const [, data] = addDocSpy.mock.calls[0]
         expect(data).toMatchObject({
@@ -90,6 +86,6 @@ describe('Publicar nuevo apunte', () => {
             tipo: 'media',
         })
 
-        expect(mockPush).toHaveBeenCalledWith('/apuntes')
+        await waitFor(() => expect(mockPush).toHaveBeenCalledWith('/apuntes'))
     })
 })

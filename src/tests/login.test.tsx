@@ -1,3 +1,7 @@
+
+import '@/test-utils/mocks/firebase-core'
+import '@/test-utils/mocks/firebase-auth'
+import '@/test-utils/mocks/router'
 import { render, screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
@@ -10,6 +14,7 @@ import {
     browserLocalPersistence,
 } from '@/test-utils/mocks/firebase-auth'
 import { mockPush } from '@/test-utils/mocks/router'
+import type { MockUser } from '@/test-utils/mocks/firebase-auth' // <-- importa el tipo
 
 // Página real
 import LoginPage from '../app/login/page'
@@ -35,10 +40,10 @@ describe('Inicio de sesión', () => {
     })
 
     it('login exitoso: persiste sesión, llama a Firebase y navega a /home', async () => {
-        // Resultado exitoso controlado
+        // Resultado exitoso controlado (sin any)
         signInWithEmailAndPasswordSpy.mockResolvedValueOnce({
-            user: { uid: 'u123', email: 'joe.arancibia@duocuc.cl' },
-        } as any)
+            user: { uid: 'u123', email: 'joe.arancibia@duocuc.cl' } satisfies MockUser,
+        })
 
         render(<LoginPage />)
 

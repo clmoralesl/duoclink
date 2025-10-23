@@ -3,7 +3,7 @@
 
 import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
-import Link from "next/link";
+import BackButton from "@/components/BackButton";
 
 type User = {
     firstName?: string;
@@ -211,9 +211,7 @@ export default function EditarPerfilPage() {
                             placeholder="https://..."
                             className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-duoc-yellow"
                         />
-                        <p className="text-sm text-gray-600 mt-1">
-                            Al guardar, la imagen se guarda como URL en el perfil local. Para carga de archivo directa se recomienda Firebase Storage.
-                        </p>
+                            {/* Al guardar, la imagen se guarda como URL en el perfil local. Para carga de archivo directa se recomienda Firebase Storage. */}
                     </div>
 
                     <div className="pt-2 flex items-center gap-3">
@@ -224,12 +222,7 @@ export default function EditarPerfilPage() {
                             Guardar cambios
                         </button>
                         {saved && <span className="text-green-700">Cambios guardados con éxito</span>}
-                        <Link
-                            href="/perfil"
-                            className="ml-auto px-4 py-2 border border-gray-300 rounded-lg text-black hover:bg-gray-50"
-                        >
-                            Volver
-                        </Link>
+                        <BackButton href="/home" layout="inline" variant="secondary" />
                     </div>
                 </form>
             </div>

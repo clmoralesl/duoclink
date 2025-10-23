@@ -1,49 +1,75 @@
 import { vi } from "vitest";
 
-/**
- * Mocks simples para Firestore y Storage usados en tests.
- * Evitar genéricos complejos en vi.fn para no provocar errores de tipado.
- */
+// ===== Tipos mínimos =====
+export type FirestoreData = Record<string, unknown>;
+export type CollectionRef = { name: string };
 
-// Spies (sin genéricos para evitar errores de TS)
-export const addDocSpy = vi.fn(async (_colRef: any, _data: any): Promise<void> => { });
-export const collectionSpy = vi.fn((_db: any, _col: string) => ({ col: _col }));
+// ===== Spies Firestore =====
+export const collectionSpy = vi.fn((_db: unknown, name: string): CollectionRef => {
+    void _db;
+    return { name };
+});
 
-export const refSpy = vi.fn((_storage: any, path: string) => ({ path }));
-export const uploadBytesSpy = vi.fn(async (_ref: any, _file: any): Promise<void> => { });
-export const getDownloadURLSpy = vi.fn(async (r: any): Promise<string> => `https://files.example/${r.path}`);
+export const addDocSpy = vi.fn(async (_col: CollectionRef, _data: FirestoreData) => {
+    void _col; void _data;
+    return { id: "mock-id" };
+});
 
-// Valores “db” y “storage” que exporta tu lib
-vi.mock("@/lib/firebase", () => ({
-    db: {} as any,
-    storage: {} as any,
+export const updateDocSpy = vi.fn(async (_ref: { id: string }, _partial: Partial<FirestoreData>) => {
+    void _ref; void _partial;
+});
+
+export const getDocsSpy = vi.fn(async (_col: CollectionRef) => {
+    void _col;
+    return { docs: [] };
+});
+
+export const serverTimestampMock = Symbol("serverTimestamp");
+export const serverTimestamp = vi.fn(() => serverTimestampMock);
+
+// ===== Spies Storage =====
+export type StorageRef = { path: string };
+
+export const refSpy = vi.fn((_storage: unknown, path: string): StorageRef => {
+    void _storage;
+    return { path };
+});
+
+export const uploadBytesSpy = vi.fn(async (_ref: StorageRef, _file: Blob | Uint8Array | ArrayBuffer) => {
+    void _ref; void _file;
+});
+
+export const getDownloadURLSpy = vi.fn(async (_ref: StorageRef) => {
+    void _ref;
+    return "https://example.com/mock.png";
+});
+
+export const deleteObjectSpy = vi.fn(async (_ref: StorageRef) => {
+    void _ref;
+});
+
+// ===== Mock de módulos Firebase =====
+// SDK modular "full"
+vi.mock("firebase/firestore", () => ({
+    collection: collectionSpy,
+    addDoc: addDocSpy,
+    getDocs: getDocsSpy,
+    updateDoc: updateDocSpy,
+    serverTimestamp,
 }));
 
-// Mock de Firestore
-export const serverTimestampMock = Symbol("serverTimestamp") as any;
+// SDK "lite" (algunos proyectos lo usan sin darse cuenta)
+vi.mock("firebase/firestore/lite", () => ({
+    collection: collectionSpy,
+    addDoc: addDocSpy,
+    getDocs: getDocsSpy,
+    updateDoc: updateDocSpy,
+    serverTimestamp,
+}));
 
-vi.mock("firebase/firestore", async () => {
-    const actual = await vi.importActual<any>("firebase/firestore");
-    return {
-        ...actual,
-        addDoc: (colRef: any, data: any) => addDocSpy(colRef, data),
-        collection: (db: any, name: string) => collectionSpy(db, name),
-        serverTimestamp: () => serverTimestampMock,
-    };
-});
-
-// Mock de Storage
-vi.mock("firebase/storage", async () => {
-    const actual = await vi.importActual<any>("firebase/storage");
-    return {
-        ...actual,
-        ref: (storage: any, path: string) => refSpy(storage, path),
-        uploadBytes: (r: any, f: any) => uploadBytesSpy(r, f),
-        getDownloadURL: (r: any) => getDownloadURLSpy(r),
-    };
-});
-
-// AuthGuard: deja pasar los children en tests
-vi.mock("@/components/AuthGuard", () => ({
-    default: ({ children }: { children: React.ReactNode }) => children,
+vi.mock("firebase/storage", () => ({
+    ref: refSpy,
+    uploadBytes: uploadBytesSpy,
+    getDownloadURL: getDownloadURLSpy,
+    deleteObject: deleteObjectSpy,
 }));
