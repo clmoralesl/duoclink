@@ -17,9 +17,21 @@ export default function Footer() {
         <div>
           <h3 className="font-semibold mb-3">Explora</h3>
           <ul className="space-y-2">
-            <li><Link href="#carpool" className="hover:text-duoc-yellow">Transporte</Link></li>
-            <li><Link href="#notes" className="hover:text-duoc-yellow">Apuntes</Link></li>
-            <li><Link href="#tutoring" className="hover:text-duoc-yellow">Ayudantías</Link></li>
+            <li>
+              <Link href="/viajes" className="hover:text-duoc-yellow">
+                Transporte
+              </Link>
+            </li>
+            <li>
+              <Link href="/apuntes" className="hover:text-duoc-yellow">
+                Apuntes
+              </Link>
+            </li>
+            <li>
+              <Link href="/home#tutoring" className="hover:text-duoc-yellow">
+                Ayudantías
+              </Link>
+            </li>
           </ul>
         </div>
 
@@ -27,9 +39,9 @@ export default function Footer() {
         <div>
           <h3 className="font-semibold mb-3">Síguenos</h3>
           <div className="flex gap-4">
-            <Link href="https://facebook.com" target="_blank">📘</Link>
-            <Link href="https://twitter.com" target="_blank">🐦</Link>
-            <Link href="https://instagram.com" target="_blank">📸</Link>
+            <a href="https://facebook.com" target="_blank" rel="noopener noreferrer">📘</a>
+            <a href="https://twitter.com" target="_blank" rel="noopener noreferrer">🐦</a>
+            <a href="https://instagram.com" target="_blank" rel="noopener noreferrer">📸</a>
           </div>
         </div>
       </div>

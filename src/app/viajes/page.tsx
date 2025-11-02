@@ -3,6 +3,7 @@
 import { useState } from "react";
 import AuthGuard from "@/components/AuthGuard";
 import BackButton from "@/components/BackButton";
+import Image from "next/image";
 
 type Trip = {
   id: number;
@@ -139,11 +140,18 @@ export default function ViajesPage() {
               </form>
             </div>
 
-            {/* Mapa (placeholder) */}
+            {/* Mapa (imagen placeholder recortada) */}
             <div className="bg-white rounded-xl shadow-md p-4">
               <h2 className="text-xl font-semibold mb-4">Mapa</h2>
-              <div className="h-[360px] rounded-lg bg-duoc-gray/40 flex items-center justify-center text-duoc-blue/60">
-                Aquí irá el mapa (Google Maps / MapLibre)
+              <div className="relative h-[360px] w-full rounded-lg overflow-hidden bg-duoc-gray/40">
+                <Image
+                  src="/images/map.png"
+                  alt="Mapa de referencia"
+                  fill
+                  className="object-cover"
+                  sizes="(max-width: 1024px) 100vw, 50vw"
+                  priority
+                />
               </div>
             </div>
           </div>
