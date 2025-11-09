@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import ModalFarmaciasDeTurno from "@/components/ModalFarmaciasDeTurno";
+import ModalFarmaciasDeTurno from "./ModalFarmaciasDeTurno";
 
 interface BotonCorazonFlotanteProps {
     className?: string;
@@ -15,11 +15,10 @@ const BotonCorazonFlotante = ({
     const [open, setOpen] = useState(false);
 
     return (
-        <>
+        <div className={`relative group ${className}`}>
             <button
                 onClick={() => setOpen(true)}
-                aria-label="Ver farmacias de turno"
-                className={`animate-heartbeat hover:scale-110 transition-transform ${className}`}
+                className="animate-heartbeat hover:scale-110 transition-transform"
                 style={{
                     width: "55px",
                     height: "55px",
@@ -42,8 +41,21 @@ const BotonCorazonFlotante = ({
                 </svg>
             </button>
 
+            {/* Tooltip flotante */}
+            <span
+                className="
+    absolute top-full right-0 mt-2
+    opacity-0 group-hover:opacity-100
+    bg-duoc-blue text-white text-xs px-2 py-1 rounded-lg shadow-md
+    transition-opacity duration-200 whitespace-nowrap
+  "
+            >
+                Farmacias de turno
+            </span>
+
+            {/* Modal (pantalla flotante de farmacias) */}
             {open && <ModalFarmaciasDeTurno onClose={() => setOpen(false)} />}
-        </>
+        </div>
     );
 };
 

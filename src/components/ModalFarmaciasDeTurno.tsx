@@ -12,6 +12,8 @@ interface FarmaciaTurno {
     comuna_nombre: string;
     local_direccion: string;
     local_telefono: string | null;
+    funcionamiento_hora_apertura: string;
+    funcionamiento_hora_cierre: string;
 }
 
 export default function ModalFarmaciasDeTurno({
@@ -138,16 +140,17 @@ export default function ModalFarmaciasDeTurno({
                                         <p className="font-semibold text-duoc-blue">
                                             🏪 {f.local_nombre}
                                         </p>
-                                        <p className="text-gray-700">
-                                            📍 {f.local_direccion}
-                                        </p>
-                                        <p className="text-gray-700">
-                                            🏙️ {f.comuna_nombre}
-                                        </p>
+                                        <p className="text-gray-700">📍 {f.local_direccion}</p>
+                                        <p className="text-gray-700">🏙️ {f.comuna_nombre}</p>
                                         <p className="text-gray-500">
-                                            ☎️ {f.local_telefono && f.local_telefono.trim() !== ""
+                                            ☎️{" "}
+                                            {f.local_telefono && f.local_telefono.trim() !== ""
                                                 ? f.local_telefono
                                                 : "No hay teléfono registrado"}
+                                        </p>
+                                        <p className="text-gray-500">
+                                            🕒 Horario: {f.funcionamiento_hora_apertura}AM -{" "}
+                                            {f.funcionamiento_hora_cierre}PM
                                         </p>
                                     </div>
                                 ))
