@@ -51,7 +51,6 @@ export default function Home() {
             <Link href="/perfil" className="!text-duoc-blue visited:!text-duoc-blue hover:!text-duoc-yellow">Perfil</Link>
             <Link href="/notificaciones" className="!text-duoc-blue visited:!text-duoc-blue hover:!text-duoc-yellow">Notificaciones</Link>
             <Link href="/configuraciones" className="!text-duoc-blue visited:!text-duoc-blue hover:!text-duoc-yellow">Configuración</Link>
-            <Link href="/login" className="!text-duoc-blue visited:!text-duoc-blue hover:!text-duoc-yellow">Cerrar Sesión</Link>
           </aside>
 
           {/* Columna central */}
