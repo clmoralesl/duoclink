@@ -4,6 +4,7 @@ import { useState } from "react";
 import AuthGuard from "@/components/AuthGuard";
 import BackButton from "@/components/BackButton";
 import Image from "next/image";
+import BotonCorazonFlotante from "@/components/BotonCorazonFlotante";
 
 type Trip = {
   id: number;
@@ -48,6 +49,10 @@ export default function ViajesPage() {
   return (
     <AuthGuard>
       <main className="min-h-screen bg-duoc-gray pt-25 pb-10 px-4 text-duoc-blue">
+        <div className="fixed top-4 right-4 z-50">
+          <BotonCorazonFlotante />
+        </div>
+
         <section className="max-w-7xl mx-auto">
           <h1 className="text-3xl md:text-4xl font-bold mb-2">Viajes</h1>
           <p className="text-duoc-blue/80 mb-8">

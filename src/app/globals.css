@@ -32,3 +32,42 @@ a {
   text-decoration: none;
   color: inherit;
 }
+
+
+@keyframes heartbeat {
+  0%, 100% {
+    transform: scale(1);
+  }
+  25% {
+    transform: scale(1.25);
+  }
+  40% {
+    transform: scale(1.1);
+  }
+  60% {
+    transform: scale(1.25);
+  }
+}
+
+@layer utilities {
+  .animate-heartbeat {
+    animation: heartbeat 1.2s infinite ease-in-out;
+  }
+}
+
+@keyframes slideInRightDl {
+  from {
+    transform: translateX(120%);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
+@layer utilities {
+  .animate-slide-in-right-dl {
+    animation: slideInRightDl 0.3s ease-out;
+  }
+}

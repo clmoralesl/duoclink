@@ -2,6 +2,7 @@
 import Link from "next/link";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import BotonCorazonFlotante from "@/components/BotonCorazonFlotante"; // agregado
 
 export default function Register() {
   const [form, setForm] = useState({
@@ -25,6 +26,11 @@ export default function Register() {
 
   return (
     <main className="min-h-screen bg-duoc-gray flex items-center justify-center px-4 pt-25 pb-10">
+      {/* Botón flotante en esquina superior derecha */}
+      <div className="fixed top-4 right-4 z-50">
+        <BotonCorazonFlotante />
+      </div>
+
       <div className="bg-white rounded-2xl shadow-2xl p-10 w-full max-w-md">
         <h1 className="text-3xl font-bold text-duoc-blue text-center mb-6">
           Crear Cuenta

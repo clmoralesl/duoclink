@@ -9,6 +9,7 @@ import {
   setPersistence,
   browserLocalPersistence,
 } from "firebase/auth";
+import BotonCorazonFlotante from "@/components/BotonCorazonFlotante"; // agregado
 
 export default function Login() {
   const [form, setForm] = useState({ email: "", password: "" });
@@ -46,6 +47,11 @@ export default function Login() {
 
   return (
     <main className="min-h-screen bg-duoc-white flex items-center justify-center px-4 pt-25 pb-10">
+      {/* Botón flotante en esquina superior derecha */}
+      <div className="fixed top-4 right-4 z-50">
+        <BotonCorazonFlotante />
+      </div>
+
       <div className="bg-white rounded-2xl shadow-2xl flex w-full max-w-3xl p-0 overflow-hidden">
         {/* Formulario */}
         <div className="flex-1 p-10 flex flex-col justify-center">

@@ -7,6 +7,7 @@ import AuthGuard from "@/components/AuthGuard";
 import BackButton from "@/components/BackButton";
 import { onAuthStateChanged, signOut } from "firebase/auth";
 import { auth } from "@/lib/firebase";
+import BotonCorazonFlotante from "@/components/BotonCorazonFlotante";
 
 type Extras = {
     firstName?: string;
@@ -105,6 +106,10 @@ export default function ConfiguracionesPage() {
     return (
         <AuthGuard>
             <main className="min-h-screen bg-duoc-gray pt-28 pb-10 px-6 text-duoc-blue">
+                <div className="fixed top-4 right-4 z-50">
+                    <BotonCorazonFlotante />
+                </div>
+
                 <div className="max-w-4xl mx-auto space-y-6">
                     {/* Sección: Cuenta */}
                     <section className="bg-white rounded-2xl shadow-md p-6">
