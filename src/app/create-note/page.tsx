@@ -6,6 +6,7 @@ import { db, storage } from "@/lib/firebase";
 import { addDoc, collection, serverTimestamp } from "firebase/firestore";
 import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
 import AuthGuard from "@/components/AuthGuard";
+import BotonCorazonFlotante from "@/components/BotonCorazonFlotante";
 
 type NoteType = "text" | "media" | "link" | "document";
 
@@ -122,6 +123,10 @@ export default function CreateNote() {
   return (
     <AuthGuard>
       <main className="min-h-screen bg-duoc-gray pt-25 pb-10 px-4">
+        <div className="fixed top-4 right-4 z-50">
+          <BotonCorazonFlotante />
+        </div>
+
         <div className="max-w-4xl mx-auto bg-white p-6 rounded-xl shadow-md flex flex-col gap-6">
           {/* Tabs */}
           <div className="flex gap-4 mb-4">

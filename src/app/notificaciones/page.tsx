@@ -3,6 +3,7 @@
 
 import Link from "next/link";
 import BackButton from "@/components/BackButton";
+import BotonCorazonFlotante from "@/components/BotonCorazonFlotante";
 
 type Notification = {
     id: string;
@@ -49,6 +50,10 @@ export default function NotificacionesPage() {
 
     return (
         <main className="min-h-screen bg-duoc-white flex items-center justify-center p-6">
+            <div className="fixed top-4 right-4 z-50">
+                <BotonCorazonFlotante />
+            </div>
+
             <div className="bg-white rounded-2xl shadow-lg w-full max-w-2xl p-8">
                 <h1 className="text-2xl font-bold text-duoc-blue mb-6 text-center">
                     Notificaciones
@@ -88,7 +93,7 @@ export default function NotificacionesPage() {
                 </div>
 
                 {/* Botón Volver igual al de Perfil */}
-                <BackButton href="/home"/>
+                <BackButton href="/home" />
             </div>
         </main>
     );
