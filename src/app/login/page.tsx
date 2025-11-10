@@ -11,6 +11,52 @@ import {
 } from "firebase/auth";
 import BotonCorazonFlotante from "@/components/BotonCorazonFlotante"; // agregado
 
+function PasswordInputWithCapsWarning(
+  props: React.InputHTMLAttributes<HTMLInputElement>
+) {
+  const [capsOn, setCapsOn] = useState(false);
+
+  const handleKeyEvent = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    // Detecta si Bloq Mayús está activo durante la escritura
+    const isOn =
+      typeof e.getModifierState === "function" &&
+      e.getModifierState("CapsLock");
+    setCapsOn(!!isOn);
+  };
+
+  const handleBlur = () => setCapsOn(false);
+
+  return (
+    <div>
+      <input
+        {...props}
+        type="password"
+        onKeyDown={(e) => {
+          handleKeyEvent(e);
+          props.onKeyDown?.(e);
+        }}
+        onKeyUp={(e) => {
+          handleKeyEvent(e);
+          props.onKeyUp?.(e);
+        }}
+        onBlur={(e) => {
+          handleBlur();
+          props.onBlur?.(e);
+        }}
+      />
+      {capsOn && (
+        <p
+          role="status"
+          aria-live="polite"
+          className="mt-1 text-xs text-yellow-600"
+        >
+          Aviso: las MAYÚS (Bloq Mayús) están activas.
+        </p>
+      )}
+    </div>
+  );
+}
+
 export default function Login() {
   const [form, setForm] = useState({ email: "", password: "" });
   const [error, setError] = useState("");
@@ -84,8 +130,7 @@ export default function Login() {
               >
                 Contraseña
               </label>
-              <input
-                type="password"
+              <PasswordInputWithCapsWarning
                 id="password"
                 placeholder="********"
                 value={form.password}
