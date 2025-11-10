@@ -17,7 +17,6 @@ function PasswordInputWithCapsWarning(
   const [capsOn, setCapsOn] = useState(false);
 
   const handleKeyEvent = (e: React.KeyboardEvent<HTMLInputElement>) => {
-    // Detecta si Bloq Mayús está activo durante la escritura
     const isOn =
       typeof e.getModifierState === "function" &&
       e.getModifierState("CapsLock");
@@ -44,15 +43,19 @@ function PasswordInputWithCapsWarning(
           props.onBlur?.(e);
         }}
       />
-      {capsOn && (
+      {/* Reserva de espacio fija para evitar cambios de tamaño */}
+      <div className="h-5 mt-1">
         <p
           role="status"
           aria-live="polite"
-          className="mt-1 text-xs text-yellow-600"
+          aria-hidden={!capsOn}
+          className={`text-xs text-yellow-600 whitespace-nowrap transition-opacity ${
+            capsOn ? "opacity-100" : "opacity-0"
+          }`}
         >
           Aviso: las MAYÚS (Bloq Mayús) están activas.
         </p>
-      )}
+      </div>
     </div>
   );
 }

@@ -23,6 +23,14 @@ export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 
 type NoteType = "text" | "media" | "link" | "document";
+interface FirestoreNoteRaw {
+  titulo?: string;
+  cuerpo?: string;
+  tags?: string[] | string;
+  tipo?: string;
+  creado?: { toDate?: () => Date };
+  userId?: string;
+}
 
 const isNonEmptyString = (v: unknown): v is string =>
   typeof v === "string" && v.trim().length > 0;
@@ -53,19 +61,27 @@ async function verifyToken(req: Request) {
   }
 }
 
+function safeError(e: unknown): { code?: string; message?: string } {
+  if (typeof e === "object" && e !== null) {
+    const maybe = e as { code?: string; message?: string };
+    return { code: maybe.code, message: maybe.message };
+  }
+  return {};
+}
+
 export async function GET() {
   try {
-    const snap = await adminDb
-      .collection("notes")
-      .orderBy("creado", "desc")
-      .limit(50)
-      .get();
-
+    const snap = await adminDb.collection("notes").orderBy("creado", "desc").limit(50).get();
     const notes = snap.docs.map(d => {
-      const data = d.data() as any;
-      const tipo: NoteType = isNoteType(data.tipo) ? data.tipo : "text";
+      const data = d.data() as FirestoreNoteRaw;
+      const tipo: NoteType = isNoteType(data.tipo) ? (data.tipo as NoteType) : "text";
       const cuerpo = typeof data.cuerpo === "string" ? data.cuerpo : "";
-      const tags = parseTags(data.tags);
+      const tags =
+        Array.isArray(data.tags)
+          ? data.tags.filter(t => typeof t === "string" && t.trim() !== "")
+          : typeof data.tags === "string"
+            ? data.tags.split(",").map(t => t.trim()).filter(t => t !== "")
+            : [];
       return {
         id: d.id,
         type: tipo,
@@ -73,13 +89,14 @@ export async function GET() {
         body: tipo === "text" ? cuerpo : undefined,
         link: tipo !== "text" ? cuerpo : undefined,
         tags,
-        createdAt: data.creado?.toDate?.().toISOString(),
+        createdAt: data.creado?.toDate?.()?.toISOString(),
+        userId: data.userId,
       };
     });
-
     return NextResponse.json(notes);
-  } catch (e: any) {
-    console.error("GET /api/apuntes error:", e?.code, e?.message);
+  } catch (e) {
+    const { code, message } = safeError(e);
+    console.error("GET /api/apuntes error:", code, message);
     return NextResponse.json({ message: "Error al obtener apuntes" }, { status: 500 });
   }
 }
@@ -89,26 +106,31 @@ export async function POST(req: Request) {
   if (!decoded) return NextResponse.json({ message: "No autenticado" }, { status: 401 });
 
   try {
-    const json = await req.json().catch(() => null);
-    if (!json || typeof json !== "object")
-      return NextResponse.json({ message: "JSON inválido" }, { status: 400 });
+    const body = await req.json().catch(() => null) as Record<string, unknown> | null;
+    if (!body) return NextResponse.json({ message: "JSON inválido" }, { status: 400 });
 
-    const titulo = (json.titulo ?? "").trim();
-    const tipoRaw = (json.tipo ?? "text").trim();
-    const tags = parseTags(json.tags);
-
+    const titulo = typeof body.titulo === "string" ? body.titulo.trim() : "";
+    const tipoRaw = typeof body.tipo === "string" ? body.tipo.trim() : "text";
+    const tagsRaw = body.tags;
     if (!titulo) return NextResponse.json({ message: "Título requerido" }, { status: 400 });
     if (!isNoteType(tipoRaw)) return NextResponse.json({ message: "Tipo inválido" }, { status: 400 });
 
     let cuerpo = "";
     if (tipoRaw === "text") {
-      cuerpo = (json.cuerpo ?? "").trim();
+      cuerpo = typeof body.cuerpo === "string" ? body.cuerpo.trim() : "";
       if (!cuerpo) return NextResponse.json({ message: "Contenido requerido" }, { status: 400 });
     } else {
-      const url = (json.url ?? "").trim();
+      const url = typeof body.url === "string" ? body.url.trim() : "";
       if (!url) return NextResponse.json({ message: "URL requerida" }, { status: 400 });
       cuerpo = url;
     }
+
+    const tags =
+      Array.isArray(tagsRaw)
+        ? tagsRaw.filter(t => typeof t === "string" && t.trim() !== "").slice(0, 25)
+        : typeof tagsRaw === "string"
+          ? tagsRaw.split(",").map(t => t.trim()).filter(t => t !== "").slice(0, 25)
+          : [];
 
     const ref = await adminDb.collection("notes").add({
       titulo,
@@ -120,12 +142,9 @@ export async function POST(req: Request) {
     });
 
     return NextResponse.json({ id: ref.id, titulo, tipo: tipoRaw, tags }, { status: 201 });
-  } catch (e: any) {
-    console.error("POST /api/apuntes error:", e?.code, e?.message);
-    const status =
-      e?.code === "permission-denied" ? 403 :
-      e?.code === "invalid-argument" ? 400 :
-      500;
-    return NextResponse.json({ message: "Error interno" }, { status });
+  } catch (e) {
+    const { code, message } = safeError(e);
+    console.error("POST /api/apuntes error:", code, message);
+    return NextResponse.json({ message: "Error interno" }, { status: 500 });
   }
 }

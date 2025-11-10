@@ -69,7 +69,7 @@ export default function NoteDetail() {
           <div className="flex flex-col items-center justify-center py-16">
             <div className="animate-spin h-10 w-10 rounded-full border-4 border-gray-300 border-t-blue-500 mb-4" />
             <p className="text-sm text-gray-600" role="status" aria-live="polite">
-              Cargando apunte….
+              Cargando apunte…
             </p>
           </div>
         </main>
