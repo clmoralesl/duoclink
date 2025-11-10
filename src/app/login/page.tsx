@@ -11,6 +11,55 @@ import {
 } from "firebase/auth";
 import BotonCorazonFlotante from "@/components/BotonCorazonFlotante"; // agregado
 
+function PasswordInputWithCapsWarning(
+  props: React.InputHTMLAttributes<HTMLInputElement>
+) {
+  const [capsOn, setCapsOn] = useState(false);
+
+  const handleKeyEvent = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    const isOn =
+      typeof e.getModifierState === "function" &&
+      e.getModifierState("CapsLock");
+    setCapsOn(!!isOn);
+  };
+
+  const handleBlur = () => setCapsOn(false);
+
+  return (
+    <div>
+      <input
+        {...props}
+        type="password"
+        onKeyDown={(e) => {
+          handleKeyEvent(e);
+          props.onKeyDown?.(e);
+        }}
+        onKeyUp={(e) => {
+          handleKeyEvent(e);
+          props.onKeyUp?.(e);
+        }}
+        onBlur={(e) => {
+          handleBlur();
+          props.onBlur?.(e);
+        }}
+      />
+      {/* Reserva de espacio fija para evitar cambios de tamaño */}
+      <div className="h-5 mt-1">
+        <p
+          role="status"
+          aria-live="polite"
+          aria-hidden={!capsOn}
+          className={`text-xs text-yellow-600 whitespace-nowrap transition-opacity ${
+            capsOn ? "opacity-100" : "opacity-0"
+          }`}
+        >
+          Aviso: las MAYÚS (Bloq Mayús) están activas.
+        </p>
+      </div>
+    </div>
+  );
+}
+
 export default function Login() {
   const [form, setForm] = useState({ email: "", password: "" });
   const [error, setError] = useState("");
@@ -84,8 +133,7 @@ export default function Login() {
               >
                 Contraseña
               </label>
-              <input
-                type="password"
+              <PasswordInputWithCapsWarning
                 id="password"
                 placeholder="********"
                 value={form.password}

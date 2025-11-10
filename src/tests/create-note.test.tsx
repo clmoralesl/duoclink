@@ -16,7 +16,7 @@ import {
 import { mockPush } from '@/test-utils/mocks/router'
 
 // Página real
-import CreateNote from '../app/create-note/page'
+import CreateNote from '../app/apuntes/create-note/page'
 
 describe('Publicar nuevo apunte', () => {
     beforeEach(() => {

@@ -2,11 +2,10 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { db, storage } from "@/lib/firebase";
-import { addDoc, collection, serverTimestamp } from "firebase/firestore";
-import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
 import AuthGuard from "@/components/AuthGuard";
 import BotonCorazonFlotante from "@/components/BotonCorazonFlotante";
+import { storage, auth } from "@/lib/firebase";
+import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
 
 type NoteType = "text" | "media" | "link" | "document";
 
@@ -20,13 +19,17 @@ export default function CreateNote() {
   const [description, setDescription] = useState("");
   const [linkUrl, setLinkUrl] = useState("");
 
-  // archivos
   const [mediaFile, setMediaFile] = useState<File | null>(null);
   const [docFile, setDocFile] = useState<File | null>(null);
 
-  // estado UI
   const [submitting, setSubmitting] = useState(false);
-  const [errors, setErrors] = useState({ title: "", body: "", description: "", linkUrl: "", file: "" });
+  const [errors, setErrors] = useState({
+    title: "",
+    body: "",
+    description: "",
+    linkUrl: "",
+    file: "",
+  });
 
   const addTag = () => {
     if (!tagInput.trim()) return;
@@ -34,7 +37,7 @@ export default function CreateNote() {
       .split(",")
       .map((t) => t.trim())
       .filter((t) => t && !tags.includes(t));
-    if (newTags.length > 0) {
+    if (newTags.length) {
       setTags([...tags, ...newTags]);
       setTagInput("");
     }
@@ -58,7 +61,7 @@ export default function CreateNote() {
       hasError = true;
     }
     if (activeTab === "text" && !body.trim()) {
-      newErrors.body = "El contenido del apunte es obligatorio";
+      newErrors.body = "El contenido es obligatorio";
       hasError = true;
     }
     if (activeTab === "link" && !linkUrl.trim()) {
@@ -66,11 +69,11 @@ export default function CreateNote() {
       hasError = true;
     }
     if (activeTab === "media" && !mediaFile) {
-      newErrors.file = "Debes seleccionar una imagen o video";
+      newErrors.file = "Selecciona un archivo";
       hasError = true;
     }
     if (activeTab === "document" && !docFile) {
-      newErrors.file = "Debes seleccionar un documento";
+      newErrors.file = "Selecciona un documento";
       hasError = true;
     }
 
@@ -80,28 +83,35 @@ export default function CreateNote() {
     try {
       setSubmitting(true);
 
+      // Subir archivo si corresponde y obtener URL
+      let urlForApi: string | undefined;
+      if (activeTab === "media" && mediaFile) urlForApi = await uploadToStorage(mediaFile, "media");
+      if (activeTab === "document" && docFile) urlForApi = await uploadToStorage(docFile, "document");
 
-      let cuerpo = "";
+      const token = await auth.currentUser?.getIdToken();
 
-      if (activeTab === "text") {
-        cuerpo = body.trim();
-      } else if (activeTab === "link") {
-        cuerpo = linkUrl.trim();
-      } else if (activeTab === "media" && mediaFile) {
-        cuerpo = await uploadToStorage(mediaFile, "media");
-      } else if (activeTab === "document" && docFile) {
-        cuerpo = await uploadToStorage(docFile, "document");
-      }
-
-      await addDoc(collection(db, "notes"), {
-        titulo: title.trim(),
-        cuerpo,
-        tags,
-        tipo: activeTab,
-        creado: serverTimestamp(),
+      const res = await fetch("/api/apuntes", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          ...(token ? { Authorization: `Bearer ${token}` } : {}),
+        },
+        body: JSON.stringify({
+          titulo: title.trim(),
+          tipo: activeTab,
+          cuerpo: activeTab === "text" ? body.trim() : undefined,
+          url: activeTab === "link" ? linkUrl.trim() : urlForApi,
+          tags,
+        }),
       });
 
-      // limpiar y redirigir
+      if (!res.ok) {
+        const data = await res.json().catch(() => ({}));
+        setErrors(prev => ({ ...prev, title: data.message || "Error al publicar" }));
+        return;
+      }
+
+      // Reset
       setTitle("");
       setBody("");
       setDescription("");
@@ -112,13 +122,13 @@ export default function CreateNote() {
       setDocFile(null);
       setErrors({ title: "", body: "", description: "", linkUrl: "", file: "" });
 
-      router.push("/apuntes"); // ajusta a tu ruta de listado
+      router.push("/apuntes");
     } catch (e) {
-      setErrors((prev) => ({ ...prev, title: "Error al publicar. Intenta nuevamente." }));
+      setErrors(prev => ({ ...prev, title: "Error al publicar. Intenta nuevamente." }));
     } finally {
       setSubmitting(false);
     }
-  };
+  }
 
   return (
     <AuthGuard>
@@ -128,42 +138,48 @@ export default function CreateNote() {
         </div>
 
         <div className="max-w-4xl mx-auto bg-white p-6 rounded-xl shadow-md flex flex-col gap-6">
-          {/* Tabs */}
           <div className="flex gap-4 mb-4">
             {["text", "media", "link", "document"].map((tab) => (
               <button
                 key={tab}
                 onClick={() => setActiveTab(tab as NoteType)}
-                className={`px-4 py-2 rounded-lg font-semibold transition cursor-pointer ${activeTab === tab ? "bg-duoc-blue text-white" : "!text-duoc-blue hover:bg-duoc-gray"
-                  }`}
+                className={`px-4 py-2 rounded-lg font-semibold transition cursor-pointer ${
+                  activeTab === tab ? "bg-duoc-blue text-white" : "!text-duoc-blue hover:bg-duoc-gray"
+                }`}
               >
-                {tab === "text" ? "Texto" : tab === "media" ? "Imagen / Video" : tab === "link" ? "Enlace" : "Documento"}
+                {tab === "text"
+                  ? "Texto"
+                  : tab === "media"
+                  ? "Imagen / Video"
+                  : tab === "link"
+                  ? "Enlace"
+                  : "Documento"}
               </button>
             ))}
           </div>
 
-          {/* Título */}
           <div className="flex flex-col gap-1">
             <input
               type="text"
-              placeholder="Título del apunte *"
+              placeholder="Título *"
               value={title}
               onChange={(e) => setTitle(e.target.value)}
-              className={`w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 ${errors.title ? "border-red-500 focus:ring-red-500" : "border-gray-300 focus:ring-duoc-yellow"
-                } text-duoc-blue`}
+              className={`w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 ${
+                errors.title ? "border-red-500 focus:ring-red-500" : "border-gray-300 focus:ring-duoc-yellow"
+              } text-duoc-blue`}
             />
             {errors.title && <p className="text-red-500 text-sm">{errors.title}</p>}
           </div>
 
-          {/* Contenido por tipo */}
           {activeTab === "text" && (
             <div className="flex flex-col gap-1">
               <textarea
-                placeholder="Escribe tu apunte aquí *"
+                placeholder="Contenido *"
                 value={body}
                 onChange={(e) => setBody(e.target.value)}
-                className={`w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 h-48 text-duoc-blue ${errors.body ? "border-red-500 focus:ring-red-500" : "border-gray-300 focus:ring-duoc-yellow"
-                  }`}
+                className={`w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 h-48 text-duoc-blue ${
+                  errors.body ? "border-red-500 focus:ring-red-500" : "border-gray-300 focus:ring-duoc-yellow"
+                }`}
               />
               {errors.body && <p className="text-red-500 text-sm">{errors.body}</p>}
             </div>
@@ -183,15 +199,15 @@ export default function CreateNote() {
                   placeholder="https:// *"
                   value={linkUrl}
                   onChange={(e) => setLinkUrl(e.target.value)}
-                  className={`w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 text-duoc-blue ${errors.linkUrl ? "border-red-500 focus:ring-red-500" : "border-gray-300 focus:ring-duoc-yellow"
-                    }`}
+                  className={`w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 text-duoc-blue ${
+                    errors.linkUrl ? "border-red-500 focus:ring-red-500" : "border-gray-300 focus:ring-duoc-yellow"
+                  }`}
                 />
                 {errors.linkUrl && <p className="text-red-500 text-sm">{errors.linkUrl}</p>}
               </div>
             </>
           )}
 
-          {/* Media */}
           {activeTab === "media" && (
             <>
               <textarea
@@ -200,7 +216,7 @@ export default function CreateNote() {
                 onChange={(e) => setDescription(e.target.value)}
                 className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 h-24 text-duoc-blue"
               />
-              <label className="block font-semibold mb-2 text-duoc-blue">Subir imagen o video</label>
+              <label className="block font-semibold mb-2 text-duoc-blue">Subir imagen o video *</label>
               <input
                 id="media-upload"
                 type="file"
@@ -219,7 +235,6 @@ export default function CreateNote() {
             </>
           )}
 
-          {/* Documento */}
           {activeTab === "document" && (
             <>
               <textarea
@@ -228,7 +243,7 @@ export default function CreateNote() {
                 onChange={(e) => setDescription(e.target.value)}
                 className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 h-24 text-duoc-blue"
               />
-              <label className="block font-semibold mb-2 text-duoc-blue">Subir documento</label>
+              <label className="block font-semibold mb-2 text-duoc-blue">Subir documento *</label>
               <input
                 id="doc-upload"
                 type="file"
@@ -247,7 +262,6 @@ export default function CreateNote() {
             </>
           )}
 
-          {/* Tags */}
           <div className="flex flex-col gap-2">
             <label className="font-semibold text-duoc-blue">Tags</label>
             <div className="flex gap-2 flex-wrap">
@@ -279,7 +293,6 @@ export default function CreateNote() {
             </div>
           </div>
 
-          {/* Publicar */}
           <button
             onClick={handlePublish}
             disabled={submitting}

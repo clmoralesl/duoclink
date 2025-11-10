@@ -2,11 +2,10 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import { db } from "@/lib/firebase";
-import { collection, getDocs, orderBy, query, limit, DocumentData } from "firebase/firestore";
 import AuthGuard from "@/components/AuthGuard";
 import BackButton from "@/components/BackButton";
 import BotonCorazonFlotante from "@/components/BotonCorazonFlotante";
+import { auth } from "@/lib/firebase";
 
 type Note = {
   id: string;
@@ -15,18 +14,8 @@ type Note = {
   body?: string;
   link?: string;
   tags: string[];
-  createdAt?: Date;
+  createdAt?: string; // ISO string desde la API
 };
-
-type FirestoreNote = {
-  titulo?: string;
-  cuerpo?: string;
-  tags?: unknown;
-  tipo?: "text" | "media" | "link" | "document";
-  creado?: { toDate?: () => Date };
-};
-
-const isNonEmptyString = (v: unknown): v is string => typeof v === "string" && v.length > 0;
 
 export default function Apuntes() {
   const [notes, setNotes] = useState<Note[]>([]);
@@ -35,27 +24,27 @@ export default function Apuntes() {
   async function fetchNotes() {
     setLoading(true);
     try {
-      const ref = collection(db, "notes");
-      const q = query(ref, orderBy("creado", "desc"), limit(20));
-      const snap = await getDocs(q);
-      const items: Note[] = snap.docs.map((d) => {
-        const data = d.data() as FirestoreNote;
-        const tipo = (data.tipo ?? "text") as Note["type"];
-        const cuerpo = typeof data.cuerpo === "string" ? data.cuerpo : "";
-        const tags = Array.isArray(data.tags) ? (data.tags as unknown[]).filter(isNonEmptyString) : [];
-        return {
-          id: d.id,
-          type: tipo,
-          title: data.titulo ?? "Sin título",
-          body: tipo === "text" ? cuerpo : undefined,
-          link: tipo === "link" ? cuerpo : undefined,
-          tags,
-          createdAt: data.creado?.toDate?.() ?? undefined,
-        };
-      });
+      const res = await fetch("/api/apuntes");
+      if (!res.ok) throw new Error("Error al cargar los apuntes");
+      const items: Note[] = await res.json();
       setNotes(items);
     } finally {
       setLoading(false);
+    }
+  }
+
+  async function handleDelete(id: string) {
+    const ok = window.confirm("¿Seguro que deseas eliminar este apunte?");
+    if (!ok) return;
+    const token = await auth.currentUser?.getIdToken();
+    const res = await fetch(`/api/apuntes/${id}`, {
+      method: "DELETE",
+      headers: token ? { Authorization: `Bearer ${token}` } : undefined,
+    });
+    if (res.ok) {
+      setNotes((prev) => prev.filter((n) => n.id !== id));
+    } else {
+      alert("Error al eliminar el apunte");
     }
   }
 
@@ -86,7 +75,7 @@ export default function Apuntes() {
 
           <div className="flex justify-start">
             <Link
-              href="/create-note"
+              href="/apuntes/create-note"
               className="mb-4 px-4 py-2 bg-duoc-yellow text-duoc-blue font-semibold rounded-lg shadow-md hover:bg-duoc-blue hover:!text-white transition cursor-pointer"
             >
               Publicar nuevo apunte
@@ -151,17 +140,31 @@ export default function Apuntes() {
                     </div>
                   )}
 
-                  <Link
-                    href={`/apuntes/${note.id}`}
-                    className="mt-2 inline-block px-4 py-2 bg-duoc-blue !text-white rounded-lg hover:bg-duoc-yellow hover:text-duoc-blue transition w-fit cursor-pointer"
-                  >
-                    Ver más
-                  </Link>
+                  <div className="mt-2 flex flex-wrap gap-2">
+                    <Link
+                      href={`/apuntes/${note.id}`}
+                      className="inline-block px-4 py-2 bg-duoc-blue !text-white rounded-lg hover:bg-duoc-yellow hover:text-duoc-blue transition w-fit cursor-pointer"
+                    >
+                      Ver más
+                    </Link>
+                    <Link
+                      href={`/apuntes/${note.id}/edit`}
+                      className="inline-block px-4 py-2 bg-white border border-duoc-blue text-duoc-blue rounded-lg hover:bg-duoc-yellow transition w-fit cursor-pointer"
+                    >
+                      Editar
+                    </Link>
+                    <button
+                      onClick={() => handleDelete(note.id)}
+                      className="inline-block px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition cursor-pointer"
+                    >
+                      Eliminar
+                    </button>
+                  </div>
                 </div>
               ))}
             </div>
           )}
-          <BackButton href="/home"/>
+          <BackButton href="/home" />
         </div>
       </main>
     </AuthGuard>
