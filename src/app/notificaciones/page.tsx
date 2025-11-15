@@ -50,9 +50,6 @@ export default function NotificacionesPage() {
 
     return (
         <main className="min-h-screen bg-duoc-white flex items-center justify-center p-6">
-            <div className="fixed top-4 right-4 z-50">
-                <BotonCorazonFlotante />
-            </div>
 
             <div className="bg-white rounded-2xl shadow-lg w-full max-w-2xl p-8">
                 <h1 className="text-2xl font-bold text-duoc-blue mb-6 text-center">

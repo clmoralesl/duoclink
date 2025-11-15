@@ -5,7 +5,6 @@ import Link from "next/link";
 import { onAuthStateChanged } from "firebase/auth";
 import { auth } from "@/lib/firebase";
 import BackButton from "@/components/BackButton";
-import BotonCorazonFlotante from "@/components/BotonCorazonFlotante";
 
 type User = {
     firstName?: string;
@@ -91,10 +90,6 @@ export default function PerfilPage() {
     return (
         <main className="min-h-screen bg-duoc-white flex items-center justify-center p-6">
             <div className="bg-white rounded-2xl shadow-lg w-full max-w-xl p-8">
-                <div className="fixed top-4 right-4 z-50">
-                    <BotonCorazonFlotante />
-                </div>
-
                 {/* Avatar centrado en la parte superior */}
                 <div className="w-full flex justify-center mb-6">
                     <div className="w-36 h-36 rounded-full overflow-hidden border-4 border-duoc-yellow bg-gray-100 flex items-center justify-center">

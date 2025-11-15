@@ -7,6 +7,7 @@ import { useRouter } from "next/navigation";
 import { onAuthStateChanged, signOut } from "firebase/auth";
 import { auth } from "@/lib/firebase";
 import NotificationsBell from "@/components/NotificationsBell";
+import BotonCorazonFlotante from "./BotonCorazonFlotante";
 
 type User = {
   firstName?: string;
@@ -136,6 +137,9 @@ export default function Navbar() {
               >
                 Cerrar sesión
               </button>
+
+              {/* Botón de corazón flotante */}
+              <BotonCorazonFlotante />
             </div>
           )}
 
@@ -176,26 +180,31 @@ export default function Navbar() {
       {/* Menú desplegable móvil */}
       {isOpen && (
         <div className="md:hidden bg-duoc-blue px-4 pb-4 flex flex-col gap-2">
-          <Link href="/apuntes" className="hover:text-duoc-yellow">
-            Apuntes
-          </Link>
-          <Link href="/viajes" className="hover:text-duoc-yellow">
-            Viajes
-          </Link>
-          <Link href="/perfil" className="hover:text-duoc-yellow">
-            Perfil
-          </Link>
-          <Link href="/home#tutoring" className="hover:text-duoc-yellow">
-            Ayudantías
-          </Link>
+          <div className="flex flex-col gap-2">
+            <Link href="/apuntes" className="hover:text-duoc-yellow">
+              Apuntes
+            </Link>
+            <Link href="/viajes" className="hover:text-duoc-yellow">
+              Viajes
+            </Link>
+            <Link href="/perfil" className="hover:text-duoc-yellow">
+              Perfil
+            </Link>
+            <Link href="/home#tutoring" className="hover:text-duoc-yellow">
+              Ayudantías
+            </Link>
+          </div>
 
           {loggedIn ? (
-            <button
-              onClick={handleLogout}
-              className="mt-2 px-4 py-2 rounded-lg bg-duoc-yellow text-duoc-blue font-semibold transition text-left"
-            >
-              Cerrar sesión
-            </button>
+            <div className="flex items-center justify-between mt-4">
+              <button
+                onClick={handleLogout}
+                className="px-4 py-2 rounded-lg bg-duoc-yellow text-duoc-blue font-semibold transition text-left"
+              >
+                Cerrar sesión
+              </button>
+              <BotonCorazonFlotante />
+            </div>
           ) : (
             <Link
               href="/login"
