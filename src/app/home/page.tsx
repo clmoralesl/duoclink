@@ -4,8 +4,7 @@
 import { useState } from "react";
 import Link from "next/link";
 import AuthGuard from "@/components/AuthGuard";
-import HomeNotasFeed from "@/components/HomeNotasFeed";
-import BotonCorazonFlotante from "@/components/BotonCorazonFlotante"; // agregado
+import HomeNotasFeed from "@/components/HomeNotasFeed"
 
 type Carpool = {
   id: number;
@@ -39,10 +38,6 @@ export default function Home() {
   return (
     <AuthGuard>
       <main className="min-h-screen bg-duoc-gray pt-25 pb-10 px-4">
-        {/* Botón flotante en esquina superior derecha */}
-        <div className="fixed top-4 right-4 z-50">
-          <BotonCorazonFlotante />
-        </div>
 
         <div className="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-4 gap-6">
           {/* Columna izquierda */}
