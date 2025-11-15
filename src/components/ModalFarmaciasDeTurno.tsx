@@ -23,6 +23,7 @@ export default function ModalFarmaciasDeTurno({
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState("");
     const [comunaSeleccionada, setComunaSeleccionada] = useState("Todas");
+    const [searchQuery, setSearchQuery] = useState(""); // Estado para la búsqueda
 
     useEffect(() => {
         async function cargarFarmacias() {
@@ -52,10 +53,20 @@ export default function ModalFarmaciasDeTurno({
 
     const comunas = Array.from(new Set(farmacias.map((f) => f.comuna_nombre))).sort();
 
-    const farmaciasFiltradas =
-        comunaSeleccionada === "Todas"
-            ? farmacias
-            : farmacias.filter((f) => f.comuna_nombre === comunaSeleccionada);
+    // Lógica de filtrado combinada
+    const farmaciasFiltradas = farmacias
+        .filter((f) => {
+            // 1. Filtrar por comuna
+            if (comunaSeleccionada === "Todas") return true;
+            return f.comuna_nombre === comunaSeleccionada;
+        })
+        .filter((f) => {
+            // 2. Filtrar por búsqueda (insensible a mayúsculas)
+            if (!searchQuery.trim()) return true; // Si no hay búsqueda, mostrar todo
+            return f.local_nombre
+                .toLowerCase()
+                .includes(searchQuery.trim().toLowerCase());
+        });
 
     return (
         <div className="fixed inset-0 z-[60] pointer-events-none">
@@ -126,10 +137,32 @@ export default function ModalFarmaciasDeTurno({
                             </select>
                         </div>
 
-                        <div className="max-h-72 overflow-y-auto space-y-2">
+                        {/* Barra de búsqueda */}
+                        <div className="mb-4 flex flex-col gap-1">
+                            <label
+                                htmlFor="search"
+                                className="font-semibold text-duoc-blue text-xs"
+                            >
+                                Buscar por nombre
+                            </label>
+                            <input
+                                id="search"
+                                type="text"
+                                value={searchQuery}
+                                onChange={(e) => setSearchQuery(e.target.value)}
+                                placeholder="Ej: Farmacia Ahumada"
+                                className="
+                  border border-gray-300 rounded-lg px-3 py-2 text-sm
+                  focus:outline-none focus:ring-2 focus:ring-duoc-yellow
+                  text-duoc-blue
+                "
+                            />
+                        </div>
+
+                        <div className="max-h-64 overflow-y-auto space-y-2">
                             {farmaciasFiltradas.length === 0 ? (
                                 <p className="text-xs text-gray-500">
-                                    No hay farmacias en esta comuna.
+                                    No se encontraron farmacias con esos criterios.
                                 </p>
                             ) : (
                                 farmaciasFiltradas.map((f) => (

@@ -4,7 +4,6 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import AuthGuard from "@/components/AuthGuard";
 import BackButton from "@/components/BackButton";
-import BotonCorazonFlotante from "@/components/BotonCorazonFlotante";
 import { auth } from "@/lib/firebase";
 
 type Note = {
@@ -55,9 +54,6 @@ export default function Apuntes() {
   return (
     <AuthGuard>
       <main className="min-h-screen bg-duoc-gray pt-25 pb-10 px-4 text-duoc-blue">
-        <div className="fixed top-4 right-4 z-50">
-          <BotonCorazonFlotante />
-        </div>
 
         <div className="max-w-5xl mx-auto">
           <h1 className="text-3xl font-bold mb-6 flex items-center justify-between">
