@@ -23,12 +23,11 @@ export default function Navbar() {
   const router = useRouter();
 
   useEffect(() => {
-    // Se observa el estado de autenticación
     const unsub = onAuthStateChanged(auth, (fbUser) => {
       if (fbUser) {
         setLoggedIn(true);
 
-        // Se combina información de Firebase y localStorage
+
         const raw = localStorage.getItem("duocUser");
         const localData = raw ? JSON.parse(raw) : {};
         setUser({

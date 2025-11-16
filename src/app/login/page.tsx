@@ -1,5 +1,5 @@
 "use client";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
 import Link from "next/link";
@@ -8,23 +8,21 @@ import {
   signInWithEmailAndPassword,
   setPersistence,
   browserLocalPersistence,
+  onAuthStateChanged,
 } from "firebase/auth";
-import BotonCorazonFlotante from "@/components/BotonCorazonFlotante"; // agregado
+import BotonCorazonFlotante from "@/components/BotonCorazonFlotante";
 
 function PasswordInputWithCapsWarning(
   props: React.InputHTMLAttributes<HTMLInputElement>
 ) {
   const [capsOn, setCapsOn] = useState(false);
-
   const handleKeyEvent = (e: React.KeyboardEvent<HTMLInputElement>) => {
     const isOn =
       typeof e.getModifierState === "function" &&
       e.getModifierState("CapsLock");
     setCapsOn(!!isOn);
   };
-
   const handleBlur = () => setCapsOn(false);
-
   return (
     <div>
       <input
@@ -43,7 +41,6 @@ function PasswordInputWithCapsWarning(
           props.onBlur?.(e);
         }}
       />
-      {/* Reserva de espacio fija para evitar cambios de tamaño */}
       <div className="h-5 mt-1">
         <p
           role="status"
@@ -64,7 +61,20 @@ export default function Login() {
   const [form, setForm] = useState({ email: "", password: "" });
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
+  const [checking, setChecking] = useState(true);
   const router = useRouter();
+
+  // Redirección si ya hay sesión
+  useEffect(() => {
+    const unsub = onAuthStateChanged(auth, (user) => {
+      if (user) {
+        router.replace("/home");
+      } else {
+        setChecking(false);
+      }
+    });
+    return () => unsub();
+  }, [router]);
 
   function handleChange(e: React.ChangeEvent<HTMLInputElement>) {
     setForm({ ...form, [e.target.id]: e.target.value });
@@ -94,15 +104,31 @@ export default function Login() {
     }
   }
 
+  // Estado de verificación con animación de carga institucional
+  if (checking) {
+    return (
+      <main className="min-h-screen flex flex-col items-center justify-center bg-duoc-yellow">
+        <div
+          className="h-14 w-14 rounded-full border-4 border-duoc-blue/30 border-t-duoc-blue animate-spin mb-4"
+          aria-hidden="true"
+        />
+        <p
+          className="text-duoc-blue font-medium text-sm"
+          role="status"
+          aria-live="polite"
+        >
+          Verificando sesión…
+        </p>
+      </main>
+    );
+  }
+
   return (
     <main className="min-h-screen bg-duoc-white flex items-center justify-center px-4 pt-25 pb-10">
-      {/* Botón flotante en esquina superior derecha */}
       <div className="fixed top-4 right-4 z-50">
         <BotonCorazonFlotante />
       </div>
-
       <div className="bg-white rounded-2xl shadow-2xl flex w-full max-w-3xl p-0 overflow-hidden">
-        {/* Formulario */}
         <div className="flex-1 p-10 flex flex-col justify-center">
           <h1 className="text-3xl font-bold text-duoc-blue text-center mb-6">
             Iniciar Sesión
@@ -122,8 +148,7 @@ export default function Login() {
                 value={form.email}
                 onChange={handleChange}
                 required
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg 
-                focus:outline-none focus:ring-2 focus:ring-duoc-yellow text-duoc-blue"
+                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-duoc-yellow text-duoc-blue"
               />
             </div>
             <div>
@@ -139,8 +164,7 @@ export default function Login() {
                 value={form.password}
                 onChange={handleChange}
                 required
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg 
-                focus:outline-none focus:ring-2 focus:ring-duoc-yellow text-duoc-blue"
+                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-duoc-yellow text-duoc-blue"
               />
             </div>
             {error && (
@@ -164,7 +188,6 @@ export default function Login() {
             </Link>
           </p>
         </div>
-        {/* Logo grande a la derecha */}
         <div className="hidden md:flex flex-col justify-center items-center bg-duoc-yellow p-10 w-2/5">
           <Image
             src="/images/dllogo.png"
