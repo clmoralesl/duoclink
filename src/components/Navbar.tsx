@@ -100,7 +100,7 @@ export default function Navbar() {
           <Link href="/viajes" className="hover:text-duoc-yellow">
             Viajes
           </Link>
-          <Link href="/home#tutoring" className="hover:text-duoc-yellow">
+          <Link href="/ayudantias" className="hover:text-duoc-yellow">
             Ayudantías
           </Link>
 
@@ -190,7 +190,7 @@ export default function Navbar() {
             <Link href="/perfil" className="hover:text-duoc-yellow">
               Perfil
             </Link>
-            <Link href="/home#tutoring" className="hover:text-duoc-yellow">
+            <Link href="/ayudantias" className="hover:text-duoc-yellow">
               Ayudantías
             </Link>
           </div>
