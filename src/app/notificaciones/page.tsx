@@ -3,7 +3,7 @@
 
 import Link from "next/link";
 import BackButton from "@/components/BackButton";
-import BotonCorazonFlotante from "@/components/BotonCorazonFlotante";
+// import BotonCorazonFlotante from "@/components/BotonCorazonFlotante";
 
 type Notification = {
     id: string;
