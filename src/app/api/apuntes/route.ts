@@ -38,16 +38,16 @@ const isNonEmptyString = (v: unknown): v is string =>
 const isNoteType = (v: unknown): v is NoteType =>
   v === "text" || v === "media" || v === "link" || v === "document";
 
-function parseTags(raw: unknown): string[] {
-  if (Array.isArray(raw)) return raw.filter(isNonEmptyString).slice(0, 25);
-  if (typeof raw === "string")
-    return raw
-      .split(",")
-      .map(t => t.trim())
-      .filter(isNonEmptyString)
-      .slice(0, 25);
-  return [];
-}
+// function parseTags(raw: unknown): string[] {
+//   if (Array.isArray(raw)) return raw.filter(isNonEmptyString).slice(0, 25);
+//   if (typeof raw === "string")
+//     return raw
+//       .split(",")
+//       .map(t => t.trim())
+//       .filter(isNonEmptyString)
+//       .slice(0, 25);
+//   return [];
+// }
 
 async function verifyToken(req: Request) {
   const h = req.headers.get("authorization");

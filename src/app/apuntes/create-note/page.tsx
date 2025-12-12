@@ -123,7 +123,7 @@ export default function CreateNote() {
       setErrors({ title: "", body: "", description: "", linkUrl: "", file: "" });
 
       router.push("/apuntes");
-    } catch (e) {
+    } catch (_e) {
       setErrors(prev => ({ ...prev, title: "Error al publicar. Intenta nuevamente." }));
     } finally {
       setSubmitting(false);

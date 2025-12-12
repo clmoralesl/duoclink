@@ -35,7 +35,7 @@ export default function ViajesPage() {
     fetchTrips();
   }, []);
 
-  function handleUnirse(trip: Trip) {
+  function handleUnirse(_trip: Trip) {
     // Aquí se podría implementar la lógica real de unirse (backend)
     // Por ahora solo mostramos el modal de éxito
     setModal({ open: true, message: "¡Te has unido exitosamente al viaje!" });
@@ -84,7 +84,7 @@ export default function ViajesPage() {
                       <p>Salida: <span className="font-medium">{t.time}</span></p>
                       <p>Cupos: <span className="font-medium">{t.seats}</span></p>
                       <p>Conductor: <span className="font-medium">{t.autor?.nombre || "Anónimo"}</span></p>
-                      {t.notes && <p className="mt-2 text-duoc-blue/80 italic">"{t.notes}"</p>}
+                      {t.notes && <p className="mt-2 text-duoc-blue/80 italic">&quot;{t.notes}&quot;</p>}
                     </div>
                   </div>
                   <button 

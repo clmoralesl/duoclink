@@ -35,25 +35,14 @@ export default function MapboxMap({
     }
   }, [latitude, longitude, zoom]);
 
-  if (!token) {
-    return (
-      <div className="w-full h-full bg-gray-100 flex items-center justify-center text-gray-500 p-4 text-center border rounded-lg">
-        <p>
-          Falta el token de Mapbox. <br />
-          Agrega <code>NEXT_PUBLIC_MAPBOX_ACCESS_TOKEN</code> a tu archivo <code>.env.local</code>.
-        </p>
-      </div>
-    );
-  }
-
   // GeoJSON para la línea recta entre origen y destino
   const routeGeoJSON = React.useMemo(() => {
     if (!origin || !destination) return null;
     return {
-      type: "Feature",
+      type: "Feature" as const,
       properties: {},
       geometry: {
-        type: "LineString",
+        type: "LineString" as const,
         coordinates: [
           [origin.lng, origin.lat],
           [destination.lng, destination.lat],
@@ -75,6 +64,17 @@ export default function MapboxMap({
       "line-opacity": 0.8,
     },
   };
+
+  if (!token) {
+    return (
+      <div className="w-full h-full bg-gray-100 flex items-center justify-center text-gray-500 p-4 text-center border rounded-lg">
+        <p>
+          Falta el token de Mapbox. <br />
+          Agrega <code>NEXT_PUBLIC_MAPBOX_ACCESS_TOKEN</code> a tu archivo <code>.env.local</code>.
+        </p>
+      </div>
+    );
+  }
 
   return (
     <div className="w-full h-full rounded-lg overflow-hidden relative">
@@ -113,7 +113,7 @@ export default function MapboxMap({
 
         {/* Línea de ruta */}
         {routeGeoJSON && (
-          <Source id="route-source" type="geojson" data={routeGeoJSON as any}>
+          <Source id="route-source" type="geojson" data={routeGeoJSON}>
             <Layer {...lineLayer} />
           </Source>
         )}
