@@ -72,10 +72,10 @@ export default function ConfiguracionesPage() {
         });
     };
 
-    const handleLogout = async () => {
-        await signOut(auth);
-        // Navegación se deja a Navbar (redirige al /login); aquí basta cerrar sesión
-    };
+    // const handleLogout = async () => {
+    //     await signOut(auth);
+    //     // Navegación se deja a Navbar (redirige al /login); aquí basta cerrar sesión
+    // };
 
     // Derivados para UI
     const fullName =

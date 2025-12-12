@@ -119,7 +119,7 @@ export default function EditarPerfilPage() {
 
             // Navegación opcional al perfil tras guardar
             // router.push("/perfil");
-        } catch (err) {
+        } catch (_err) {
             alert("No fue posible guardar los cambios. Intente nuevamente.");
         }
     }
