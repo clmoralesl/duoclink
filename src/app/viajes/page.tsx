@@ -79,7 +79,9 @@ export default function ViajesPage() {
               {trips.map((t) => (
                 <article key={t.id} className="bg-white rounded-xl shadow-md p-5 hover:shadow-lg transition flex flex-col">
                   <div className="flex-1">
-                    <h3 className="text-lg font-bold text-duoc-blue mb-2">{t.from} → {t.to}</h3>
+                    <h3 className="text-lg font-bold text-duoc-blue mb-2">
+                      {t.from.split(',')[0]} → {t.to.split(',')[0]}
+                    </h3>
                     <div className="space-y-1 text-sm">
                       <p>Salida: <span className="font-medium">{t.time}</span></p>
                       <p>Cupos: <span className="font-medium">{t.seats}</span></p>
@@ -87,37 +89,41 @@ export default function ViajesPage() {
                       {t.notes && <p className="mt-2 text-duoc-blue/80 italic">&quot;{t.notes}&quot;</p>}
                     </div>
                   </div>
-                  <button 
-                    onClick={() => handleUnirse(t)}
-                    className="mt-4 w-full bg-duoc-yellow text-duoc-blue px-4 py-2 rounded-lg font-semibold hover:opacity-90 transition"
-                  >
-                    Unirme
-                  </button>
+                  <div className="mt-4 flex gap-2">
+                    <Link
+                      href={`/viajes/${t.id}`}
+                      className="flex-1 bg-duoc-blue !text-white px-4 py-2 rounded-lg font-semibold text-center hover:opacity-90 transition"
+                    >
+                      Ver detalle
+                    </Link>
+                    <button 
+                      onClick={() => handleUnirse(t)}
+                      className="flex-1 bg-duoc-yellow text-duoc-blue px-4 py-2 rounded-lg font-semibold hover:opacity-90 transition"
+                    >
+                      Unirme
+                    </button>
+                  </div>
                 </article>
               ))}
             </div>
           )}
           
-          <div className="mt-8">
-             <BackButton href="/home"/>
-          </div>
-        </div>
-
-        {/* Modal simple */}
-        {modal.open && (
-          <div className="fixed inset-0 flex items-center justify-center z-50 bg-black/50">
-            <div className="bg-white p-6 rounded-lg shadow-lg max-w-sm w-full text-center">
-              <h3 className="text-xl font-bold mb-4 text-duoc-blue">Información</h3>
-              <p className="mb-6 text-gray-700">{modal.message}</p>
-              <button
-                onClick={closeModal}
-                className="bg-duoc-blue text-white px-4 py-2 rounded hover:bg-duoc-yellow hover:text-duoc-blue transition"
-              >
-                Cerrar
-              </button>
+          {/* Modal de éxito */}
+          {modal.open && (
+            <div className="fixed inset-0 flex items-center justify-center z-50 bg-black/50">
+              <div className="bg-white p-6 rounded-xl shadow-lg max-w-sm w-full text-center">
+                <h3 className="text-xl font-bold text-duoc-blue mb-2">¡Listo!</h3>
+                <p className="text-gray-600 mb-4">{modal.message}</p>
+                <button 
+                  onClick={closeModal}
+                  className="bg-duoc-blue text-white px-4 py-2 rounded-lg font-semibold hover:bg-duoc-yellow hover:text-duoc-blue transition"
+                >
+                  Aceptar
+                </button>
+              </div>
             </div>
-          </div>
-        )}
+          )}
+        </div>
       </main>
     </AuthGuard>
   );
