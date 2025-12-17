@@ -35,7 +35,7 @@ export default function MapboxMap({
     }
   }, [latitude, longitude, zoom]);
 
-  // GeoJSON para la línea recta entre origen y destino
+
   const routeGeoJSON = React.useMemo(() => {
     if (!origin || !destination) return null;
     return {

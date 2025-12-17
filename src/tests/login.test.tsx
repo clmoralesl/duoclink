@@ -11,6 +11,7 @@ import '@/test-utils/mocks/router'
 import {
     setPersistenceSpy,
     signInWithEmailAndPasswordSpy,
+    onAuthStateChangedSpy,
     browserLocalPersistence,
 } from '@/test-utils/mocks/firebase-auth'
 import { mockPush } from '@/test-utils/mocks/router'
@@ -22,6 +23,10 @@ import LoginPage from '../app/login/page'
 describe('Inicio de sesión', () => {
     beforeEach(() => {
         vi.clearAllMocks()
+        onAuthStateChangedSpy.mockImplementation((_auth, cb) => {
+            cb(null)
+            return () => {}
+        })
     })
 
     it('permite escribir credenciales', async () => {

@@ -40,7 +40,6 @@ export default function ViajeDetallePage({ params }: { params: Promise<{ id: str
         if (token) {
           const fetchCoord = async (query: string) => {
             try {
-              // Búsqueda limitada a Chile (country=CL) para mejor precisión
               const url = `https://api.mapbox.com/geocoding/v5/mapbox.places/${encodeURIComponent(query)}.json?access_token=${token}&limit=1&country=CL`;
               const geoRes = await fetch(url);
               const geoData = await geoRes.json();

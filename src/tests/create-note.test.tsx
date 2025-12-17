@@ -21,6 +21,12 @@ import CreateNote from '../app/apuntes/create-note/page'
 describe('Publicar nuevo apunte', () => {
     beforeEach(() => {
         vi.clearAllMocks()
+        global.fetch = vi.fn(() =>
+            Promise.resolve({
+                ok: true,
+                json: () => Promise.resolve({ id: '123' }),
+            })
+        ) as any
     })
 
     it('valida campos requeridos en modo Texto (título y contenido)', async () => {
@@ -30,31 +36,33 @@ describe('Publicar nuevo apunte', () => {
         await userEvent.click(publicar)
 
         expect(await screen.findByText(/el título es obligatorio/i)).toBeInTheDocument()
-        expect(screen.getByText(/el contenido del apunte es obligatorio/i)).toBeInTheDocument()
-        expect(addDocSpy).not.toHaveBeenCalled()
+        expect(screen.getByText(/el contenido es obligatorio/i)).toBeInTheDocument()
+        expect(global.fetch).not.toHaveBeenCalled()
     })
 
     it('publica un apunte de Texto y redirige a /apuntes', async () => {
         render(<CreateNote />)
 
-        const titulo = screen.getByPlaceholderText(/título del apunte \*/i)
-        const cuerpo = screen.getByPlaceholderText(/escribe tu apunte aquí \*/i)
+        const titulo = screen.getByPlaceholderText(/título \*/i)
+        const cuerpo = screen.getByPlaceholderText(/contenido \*/i)
 
         await userEvent.type(titulo, 'Apunte de Algebra')
         await userEvent.type(cuerpo, 'Definiciones y propiedades…')
         await userEvent.click(screen.getByRole('button', { name: /publicar/i }))
 
-        // Espera a que addDoc sea invocado (no dependemos de la implementación interna de collection)
-        await waitFor(() => expect(addDocSpy).toHaveBeenCalledTimes(1))
+        // Espera a que fetch sea invocado
+        await waitFor(() => expect(global.fetch).toHaveBeenCalledTimes(1))
 
-        const [, data] = addDocSpy.mock.calls[0]
-        expect(data).toMatchObject({
-            titulo: 'Apunte de Algebra',
-            cuerpo: 'Definiciones y propiedades…',
-            tags: [],
-            tipo: 'text',
-        })
-        expect(data.creado).toBe(serverTimestampMock)
+        expect(global.fetch).toHaveBeenCalledWith('/api/apuntes', expect.objectContaining({
+            method: 'POST',
+            body: expect.stringContaining('"titulo":"Apunte de Algebra"'),
+        }))
+        expect(global.fetch).toHaveBeenCalledWith('/api/apuntes', expect.objectContaining({
+            body: expect.stringContaining('"cuerpo":"Definiciones y propiedades…"'),
+        }))
+        expect(global.fetch).toHaveBeenCalledWith('/api/apuntes', expect.objectContaining({
+            body: expect.stringContaining('"tipo":"text"'),
+        }))
 
         await waitFor(() => expect(mockPush).toHaveBeenCalledWith('/apuntes'))
     })
@@ -64,7 +72,7 @@ describe('Publicar nuevo apunte', () => {
 
         await userEvent.click(screen.getByRole('button', { name: /imagen \/ video/i }))
 
-        const titulo = screen.getByPlaceholderText(/título del apunte \*/i)
+        const titulo = screen.getByPlaceholderText(/título \*/i)
         await userEvent.type(titulo, 'Foto laboratorio')
 
         const fileInput = screen.getByLabelText(/seleccionar archivo/i) as HTMLInputElement
@@ -77,14 +85,18 @@ describe('Publicar nuevo apunte', () => {
         await userEvent.click(screen.getByRole('button', { name: /publicar/i }))
 
         await waitFor(() => expect(uploadBytesSpy).toHaveBeenCalledTimes(1))
-        await waitFor(() => expect(addDocSpy).toHaveBeenCalledTimes(1))
+        await waitFor(() => expect(global.fetch).toHaveBeenCalledTimes(1))
 
-        const [, data] = addDocSpy.mock.calls[0]
-        expect(data).toMatchObject({
-            titulo: 'Foto laboratorio',
-            cuerpo: 'https://files.example/lab.png',
-            tipo: 'media',
-        })
+        expect(global.fetch).toHaveBeenCalledWith('/api/apuntes', expect.objectContaining({
+            method: 'POST',
+            body: expect.stringContaining('"titulo":"Foto laboratorio"'),
+        }))
+        expect(global.fetch).toHaveBeenCalledWith('/api/apuntes', expect.objectContaining({
+            body: expect.stringContaining('"url":"https://files.example/lab.png"'),
+        }))
+        expect(global.fetch).toHaveBeenCalledWith('/api/apuntes', expect.objectContaining({
+            body: expect.stringContaining('"tipo":"media"'),
+        }))
 
         await waitFor(() => expect(mockPush).toHaveBeenCalledWith('/apuntes'))
     })
